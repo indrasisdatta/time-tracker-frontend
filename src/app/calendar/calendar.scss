@@ -1,0 +1,28 @@
+.rbc-event,
+.rbc-day-slot .rbc-background-event {
+  text-align: center;
+  margin: 0 auto;
+  width: 20%;
+}
+.rbc-toolbar {
+  flex-direction: row-reverse;
+}
+.rbc-toolbar .rbc-toolbar-label {
+  text-align: center;
+  font-size: 1.5em;
+}
+.rbc-toolbar button {
+  color: inherit;
+}
+.dark {
+  .rbc-toolbar button {
+    border: 1px solid var(--color-light);
+  }
+}
+.light {
+  .rbc-toolbar button {
+    border: 1px solid;
+    border-color: rgb(209 213 219 / var(--tw-border-opacity));
+    background-color: var(--color-light);
+  }
+}

@@ -1,8 +1,14 @@
 "use client";
 import moment from "moment";
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import {
+  Calendar,
+  Event,
+  EventPropGetter,
+  momentLocalizer,
+} from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { hourStatus } from "@/utils/helper";
+import "./calendar.scss";
 
 const localizer = momentLocalizer(moment);
 
@@ -14,19 +20,21 @@ const myEvents = [
   { start: new Date("2023-08-18"), end: new Date("2023-08-18"), title: "5" },
 ];
 
-const CustomToolbar = ({ label, onNavigate }) => {
-  <div>
-    <button onClick={() => onNavigate("PREV")}>Prev</button>
-    <button onClick={() => onNavigate("NEXT")}>Next</button>
-  </div>;
-};
+// const CustomToolbar = (onNavigate) => {
+//   <div>
+//     <button onClick={() => onNavigate("PREV")}>Prev</button>
+//     <button onClick={() => onNavigate("NEXT")}>Next</button>
+//   </div>;
+// };
 
-const eventPropGetter = (event) => {
-  console.log(event);
+const eventPropGetter: EventPropGetter<Event> = (event) => {
+  // console.log(event);
   const hrs = Number(event.title);
-  const { className: hrCls } = hourStatus(hrs);
+  const { style } = hourStatus(hrs);
+  console.log("Style", style);
   return {
-    className: `!${hrCls} !text-center !m-auto md:!w-1/5`,
+    className: `!text-center !m-auto md:!w-1/5`,
+    style,
   };
 };
 
