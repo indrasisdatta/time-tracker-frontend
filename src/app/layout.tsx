@@ -20,12 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ThemeWrapper>
-        <body className={inter.className}>
+      <body className={inter.className}>
+        <ThemeWrapper>
           <Header />
           <div className="container mx-auto p-8">{children}</div>
-        </body>
-      </ThemeWrapper>
+        </ThemeWrapper>
+      </body>
     </html>
   );
 }
