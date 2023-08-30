@@ -1,21 +1,9 @@
 "use client";
-import { ThemeContext } from "@/Provider/ThemeProvider";
-import { useContext, useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 export const ThemeSwitch = () => {
-  const { mode, toggleTheme } = useContext(ThemeContext);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    if (mode === "dark") {
-      setIsDark(true);
-    } else {
-      setIsDark(false);
-    }
-  }, [mode]);
-
-  console.log("Theme selected", mode);
-  console.log("Theme isDark", isDark);
+  const { systemTheme, theme, setTheme } = useTheme();
+  // const currentTheme = theme === "system" ? systemTheme : theme;
 
   return (
     <div>
@@ -30,8 +18,10 @@ export const ThemeSwitch = () => {
         type="checkbox"
         role="switch"
         id="flexSwitchCheckDefault"
-        checked={mode === "dark"}
-        onChange={(e) => toggleTheme(e.target.checked)}
+        checked={theme === "dark"}
+        onChange={() =>
+          theme == "dark" ? setTheme("light") : setTheme("dark")
+        }
         data-testid="theme-switch"
       />
       <label

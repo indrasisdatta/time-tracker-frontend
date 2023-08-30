@@ -1,10 +1,10 @@
-import { ThemeProvider } from "@/Provider/ThemeProvider";
+// import { ThemeProvider } from "@/Provider/ThemeProvider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Link from "next/link";
-import { ThemeSwitch } from "@/common/components/ThemeSwitch";
-import { Header } from "@/common/components/Header";
+import { Header } from "./common/components/Header";
+// import { ThemeProvider } from "next-themes";
+import { ThemeWrapper } from "./ThemeWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,13 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ThemeProvider>
+      <ThemeWrapper>
+        <body className={inter.className}>
           <Header />
-          <ThemeSwitch />
           <div className="container mx-auto p-8">{children}</div>
-        </ThemeProvider>
-      </body>
+        </body>
+      </ThemeWrapper>
     </html>
   );
 }

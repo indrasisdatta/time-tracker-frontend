@@ -1,4 +1,6 @@
 import Link from "next/link";
+import "../../globals.css";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 export const Header = () => {
   return (
@@ -19,6 +21,7 @@ export const Header = () => {
             </Link>
           </div>
         </div>
+        <ThemeSwitch />
       </nav>
     </header>
   );
