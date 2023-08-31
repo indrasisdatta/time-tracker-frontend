@@ -150,8 +150,8 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
               Sub categories
             </label>
             {fields.map((field, index) => (
-              <div key={field.id} className="mt-1 flex gap-4">
-                <div className="w-3/12">
+              <div key={field.id} className="mt-3 md:flex gap-4">
+                <div className="w-full md:w-3/12">
                   <div className={getInputDivClass("subCategoryName")}>
                     <input
                       type="text"
@@ -167,7 +167,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                     />
                   </div>
                 </div>
-                <div className="w-8/12">
+                <div className="w-full md:w-8/12 mt-2 md:mt-0">
                   <div
                     className={`${getInputDivClass("subcategoryDescription")}`}
                   >
@@ -185,25 +185,29 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                     />
                   </div>
                 </div>
-                <div className="w-1/12 text-right">
+                <div className="w-full md:w-1/12 mt-2 md:mt-0 md:text-right">
                   {index === 0 && (
                     <button
                       type="button"
-                      className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded d-flex justify-content-right"
-                      onClick={() => append({ tag: "" })}
-                      data-testid={`del-btn-${index}`}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded w-full md:w-auto md:d-flex justify-content-right"
+                      onClick={() => append({ name: "", description: "" })}
+                      data-testid={`add-btn-${index}`}
                     >
-                      <PlusIcon className="h-4 w-4" />
+                      <PlusIcon className="h-4 w-4 hidden md:block" />
+                      <span className="md:hidden font-normal text-sm">Add</span>
                     </button>
                   )}
                   {index > 0 && (
                     <button
                       type="button"
-                      className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded d-flex justify-content-right"
+                      className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded  w-full md:w-auto md:d-flex justify-content-right"
                       onClick={() => remove(index)}
                       data-testid={`del-btn-${index}`}
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <TrashIcon className="h-4 w-4 hidden md:block" />
+                      <span className="md:hidden font-normal text-sm">
+                        Delete
+                      </span>
                     </button>
                   )}
                 </div>
@@ -216,7 +220,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           <button
             // disabled={isLoading}
             type="submit"
-            className="rounded-md block bg-indigo-600 px-3 py-1 text-md text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="w-full md:w-auto md:d-flex rounded-md block bg-indigo-600 px-3 py-1 text-md text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Save
           </button>
