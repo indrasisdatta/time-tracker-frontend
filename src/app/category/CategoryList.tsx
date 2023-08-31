@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { Loader } from "../common/components/Loader";
 import { getCategories } from "@/services/CategoryService";
-import { useQuery, QueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { Category } from "@/models/Category";
 import { PencilIcon } from "@heroicons/react/20/solid";
 
@@ -26,7 +26,7 @@ const CategoryList = () => {
         <h1 className="text-xl font-bold">Category List</h1>
 
         <Link
-          href={"/product/add"}
+          href={"/category/add"}
           className="rounded-md block bg-indigo-600 px-3 py-2 text-md text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Add Category

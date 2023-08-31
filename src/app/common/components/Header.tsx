@@ -11,7 +11,7 @@ export const Header = () => {
   return (
     <header className="border-b-[1px] border-gray-300">
       <nav className="flex items-center justify-between flex-wrap py-3 px-8">
-        <div className="flex items-center flex-shrink-0 text-white mr-6 lg:mr-72">
+        <div className="flex items-center flex-shrink-0  text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-6 lg:mr-72">
           <Link href="/">Timesheet App</Link>
         </div>
         {/* Mobile display */}
@@ -43,13 +43,13 @@ export const Header = () => {
         >
           <div className="text-sm lg:flex-grow">
             <Link
-              href="category"
+              href="/category"
               className="block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-4"
             >
               Category
             </Link>
             <Link
-              href="calendar"
+              href="/calendar"
               className="block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-4"
             >
               Calendar
