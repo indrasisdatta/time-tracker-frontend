@@ -6,13 +6,28 @@ import { getCategories } from "@/services/CategoryService";
 import { useQuery } from "react-query";
 import { Category } from "@/models/Category";
 import { PencilIcon } from "@heroicons/react/20/solid";
+import { useSearchParams } from "next/navigation";
+import { toast, Toaster } from "react-hot-toast";
 
 const CategoryList = () => {
+  // const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  /* Show success message for category add, edit */
+  for (let param of searchParams) {
+    console.log("Param", param);
+    if (param[0] === "op" && param[1] === "add") {
+      toast.success("Category added successfully");
+    } else if (param[0] === "op" && param[1] === "update") {
+      toast.success("Category updated successfully");
+    }
+  }
+  /* API call */
   const fetchCategories = async () => {
     const { data } = await getCategories();
     return data;
   };
-
+  /* Store API result in 'categories' key and destructure returned object */
   const { isSuccess, isError, isLoading, data, error } = useQuery(
     "categories",
     fetchCategories
@@ -22,9 +37,9 @@ const CategoryList = () => {
 
   return (
     <div className="container mx-auto">
+      <Toaster />
       <div className="flex justify-between">
         <h1 className="text-xl font-bold">Category List</h1>
-
         <Link
           href={"/category/add"}
           className="rounded-md block bg-indigo-600 px-3 py-2 text-md text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

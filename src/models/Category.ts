@@ -10,3 +10,9 @@ export interface Category {
   description: string;
   subCategories: SubCategory[];
 }
+
+export type CategoryAddFormValues = {
+  name: string;
+  description: string;
+  subCategories: [{ name: string; description: string }];
+};
