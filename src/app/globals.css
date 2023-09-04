@@ -14,4 +14,7 @@
   body {
     @apply dark:bg-gray-800 bg-white;
   }
+  .cat-actions svg {
+    display: inline-block;
+  }
 }

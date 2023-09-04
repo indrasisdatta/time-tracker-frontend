@@ -16,3 +16,7 @@ export const addCategory = async (data: CategoryAddFormValues) => {
 export const updateCategory = async (data: Category) => {
   return await axios.put(`category/${data._id}`, data);
 };
+
+export const deleteCategory = async (catId: string) => {
+  return await axios.delete(`category/${catId}`);
+};
