@@ -27,6 +27,7 @@ const AddCategory: React.FC = () => {
           description: "",
           subCategories: [{ name: "", description: "" }],
         }}
+        category={null}
       />
     </QueryClientProvider>
   );

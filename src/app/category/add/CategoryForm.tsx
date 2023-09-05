@@ -1,21 +1,24 @@
 import { Loader } from "@/app/common/components/Loader";
-import { CategoryAddFormValues } from "@/models/Category";
-import { addCategory } from "@/services/CategoryService";
+import { Category, CategoryAddFormValues } from "@/models/Category";
+import { addCategory, updateCategory } from "@/services/CategoryService";
 import { PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { redirect, useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Toaster, toast } from "react-hot-toast";
 import { useMutation } from "react-query";
 
 type CategoryFormProps = {
   defaultValues: CategoryAddFormValues;
+  category: Category | null;
 };
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
   defaultValues,
+  category,
 }: {
   defaultValues: CategoryAddFormValues;
+  category: Category | null;
 }) => {
   /* React hook form initialized */
   const {
@@ -23,12 +26,30 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<CategoryAddFormValues>({
     defaultValues,
   });
 
+  useEffect(() => {
+    if (category) {
+      reset({
+        name: category.name,
+        description: category.description,
+        subCategories: category?.subCategories,
+      });
+    }
+  }, [category, reset]);
+
   /* Form submit API call */
-  const saveCategory = async (formData: CategoryAddFormValues) => {
+  const saveCategory = async (
+    formData: CategoryAddFormValues
+  ): Promise<any> => {
+    if (category && category?._id) {
+      const { data } = await updateCategory(formData, category?._id);
+      console.log("Update data", data);
+      return data;
+    }
     const { data } = await addCategory(formData);
     return data;
   };
@@ -51,7 +72,8 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   } else if (data) {
     // toast.success("Category saved successful");
     // redirect("/category");
-    router.push("/category?op=add");
+    const op = !!category && category?._id ? "update" : "add";
+    router.push(`/category?op=${op}`);
   }
 
   /**
@@ -116,7 +138,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
   /* Form submit action - call mutate function of react-query */
   const onSubmit = (formData: CategoryAddFormValues) => {
-    console.log("Add data", formData);
+    console.log("Submitted data", formData);
     mutate(formData);
   };
 

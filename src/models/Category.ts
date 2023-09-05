@@ -11,8 +11,16 @@ export interface Category {
   subCategories: SubCategory[];
 }
 
+export interface SubCategoryFormValues {
+  _id?: string;
+  name: string;
+  description?: string;
+}
+
 export type CategoryAddFormValues = {
+  _id?: string;
   name: string;
   description: string;
-  subCategories: [{ name: string; description: string }];
+  subCategories: SubCategoryFormValues[];
+  // subCategories: [{ _id?: string; name: string; description?: string }];
 };
