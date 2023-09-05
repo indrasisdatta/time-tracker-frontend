@@ -4,9 +4,18 @@ import Link from "next/link";
 import "../../globals.css";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const pathName = usePathname();
+
+  const activeLinkClass = (url: string) => {
+    return pathName.includes(url)
+      ? "active text-indigo-600 dark:text-white font-bold"
+      : "text-indigo-700 dark:text-teal-100 dark:hover:text-white";
+  };
 
   return (
     <header className="border-b-[1px] border-gray-300">
@@ -44,13 +53,17 @@ export const Header = () => {
           <div className="text-sm lg:flex-grow">
             <Link
               href="/category"
-              className="block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-4"
+              className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                "/category"
+              )}`}
             >
               Category
             </Link>
             <Link
               href="/calendar"
-              className="block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-4"
+              className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                "/calendar"
+              )}`}
             >
               Calendar
             </Link>
