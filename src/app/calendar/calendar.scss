@@ -26,3 +26,10 @@
     background-color: var(--color-light);
   }
 }
+.date-container {
+  [disabled].line-through {
+    text-decoration-line: none;
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+}

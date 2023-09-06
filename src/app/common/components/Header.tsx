@@ -21,7 +21,11 @@ export const Header = () => {
     function handleClick(event: any) {
       // console.log("Dropdown ref", calDropdown.current);
       // console.log("Target", event.target);
-      if (calDropdown.current && !calDropdown.current.contains(event.target)) {
+      if (
+        calDropdown.current &&
+        (!calDropdown.current.contains(event.target) ||
+          event.target.className.includes("submenu-link"))
+      ) {
         setShowCalMenu(false);
       }
     }
@@ -114,7 +118,7 @@ export const Header = () => {
                     <li>
                       <Link
                         href="/calendar"
-                        className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                        className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white submenu-link"
                       >
                         View Calendar
                       </Link>
@@ -122,7 +126,7 @@ export const Header = () => {
                     <li>
                       <Link
                         href="/calendar/timesheet"
-                        className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                        className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white submenu-link"
                       >
                         Timesheet entry
                       </Link>
