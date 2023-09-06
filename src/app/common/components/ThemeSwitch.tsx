@@ -5,6 +5,8 @@ export const ThemeSwitch = () => {
   const { systemTheme, theme, setTheme } = useTheme();
   // const currentTheme = theme === "system" ? systemTheme : theme;
 
+  console.log("Theme", systemTheme, theme);
+
   return (
     <div>
       <label
@@ -18,9 +20,13 @@ export const ThemeSwitch = () => {
         type="checkbox"
         role="switch"
         id="flexSwitchCheckDefault"
-        checked={theme === "dark"}
+        checked={
+          theme === "dark" || (systemTheme === "dark" && theme === "system")
+        }
         onChange={() =>
-          theme == "dark" ? setTheme("light") : setTheme("dark")
+          theme == "dark" || (systemTheme === "dark" && theme === "system")
+            ? setTheme("light")
+            : setTheme("dark")
         }
         data-testid="theme-switch"
       />
