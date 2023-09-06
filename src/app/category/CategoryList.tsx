@@ -65,17 +65,25 @@ const CategoryList = () => {
     if (
       param[0] === "op" &&
       param[1] === "add" &&
-      (!toastMsgRef || !toastMsgRef.current)
+      (!toastMsgRef || !toastMsgRef.current) &&
+      typeof window !== undefined
     ) {
       toastMsgRef.current = true;
-      toast.success("Category added successfully");
+      console.log("Toast message for add");
+      // setTimeout(() => {
+      // toast.success("Category added successfully");
+      // }, 3000);
     } else if (
       param[0] === "op" &&
       param[1] === "update" &&
-      (!toastMsgRef || !toastMsgRef.current)
+      (!toastMsgRef || !toastMsgRef.current) &&
+      typeof window !== undefined
     ) {
       toastMsgRef.current = true;
-      toast.success("Category updated successfully");
+      console.log("Toast message for update");
+      // setTimeout(() => {
+      // toast.success("Category updated successfully");
+      // }, 3000);
     }
   }
   /* API call */

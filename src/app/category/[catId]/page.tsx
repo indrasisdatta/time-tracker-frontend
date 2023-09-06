@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { CategoryForm } from "../add/CategoryForm";
+import { CategoryForm } from "../CategoryForm";
 import { getCategory } from "@/services/CategoryService";
 import { Category } from "@/models/Category";
 

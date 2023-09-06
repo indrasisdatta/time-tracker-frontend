@@ -1,7 +1,8 @@
 "use client";
 import { useTheme } from "next-themes";
+import { memo } from "react";
 
-export const ThemeSwitch = () => {
+const ThemeSwitchComp = () => {
   const { systemTheme, theme, setTheme } = useTheme();
   // const currentTheme = theme === "system" ? systemTheme : theme;
 
@@ -39,3 +40,5 @@ export const ThemeSwitch = () => {
     </div>
   );
 };
+
+export const ThemeSwitch = memo(ThemeSwitchComp);

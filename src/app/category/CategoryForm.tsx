@@ -74,6 +74,12 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     // redirect("/category");
     const op = !!category && category?._id ? "update" : "add";
     router.push(`/category?op=${op}`);
+    setTimeout(() => {
+      toast.success("Category saved", {
+        position: "top-right",
+        // autoClose: 5000,
+      });
+    }, 1);
   }
 
   /**
