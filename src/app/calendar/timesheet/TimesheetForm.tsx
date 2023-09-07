@@ -14,7 +14,7 @@ import "react-clock/dist/Clock.css";
 import Select from "react-tailwindcss-select";
 import { getCategories } from "@/services/CategoryService";
 import { useQuery } from "react-query";
-import { Category } from "@/models/Category";
+import { Category, SubCategory } from "@/models/Category";
 import { TimesheetPayload } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
@@ -25,7 +25,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 const defaultDropdownOptions = {
   categoryList: [],
-  subcategoryList: [],
+  subCategoryList: [],
 };
 const defaultTimesheetFormData: TimesheetPayload = {
   timesheetDate: "",
@@ -37,8 +37,6 @@ export const TimesheetForm = () => {
     startDate: null,
     endDate: null,
   });
-  const [value, onChange] = useState("10:00");
-  const [cat, setCat] = useState(null);
 
   const [timesheetFormData, setTimesheetFormData] = useState<TimesheetPayload>(
     defaultTimesheetFormData
@@ -48,15 +46,28 @@ export const TimesheetForm = () => {
     switch (action.type) {
       case "CATEGORY_LOAD":
         return { ...state, categoryList: action.payload };
-        break;
-      case "SUBCATEGORY_LOAD":
-        break;
+      // case "SUBCATEGORY_LOAD":
+      //   break;
       case "CATEGORY_SELECT":
-        break;
-      case "SUBCATEGORY_SELECT":
-        break;
-      case "UPDATE":
-        break;
+        let subCats = [];
+        let matchingCat = state.categoryList.find(
+          (cat: any) => cat.value === action.payload.catId
+        );
+        if (matchingCat) {
+          subCats = matchingCat.subCategories?.map((subCat: SubCategory) => ({
+            value: subCat._id,
+            label: subCat.name,
+          }));
+          subCats;
+        }
+        return {
+          ...state,
+          subCategoryList: subCats,
+        };
+      // case "SUBCATEGORY_SELECT":
+      //   break;
+      // case "UPDATE":
+      //   break;
       default:
         return state;
     }
@@ -86,7 +97,7 @@ export const TimesheetForm = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<TimesheetPayload>();
+  } = useForm<TimesheetPayload>(defaultTimesheetFormData);
 
   /* In built react-hook function to add, remove rows */
   const {
@@ -110,28 +121,40 @@ export const TimesheetForm = () => {
         payload: categoryData.data.map((cat: Category) => ({
           value: cat._id,
           label: cat.name,
+          subCategories: cat.subCategories,
         })),
       });
     }
   }, [categoryData]);
 
-  const handleChange = (type, value) => {
-    console.log("Change handler:", type, value);
-
-    setCat(value);
+  /* Timeslots input change event handler */
+  const handleChange = (index: number, type: string, selectedOption: any) => {
+    console.log("Change handler:", index, type, selectedOption);
+    switch (type) {
+      case "category":
+        dispatchDropdownOptions({
+          type: "CATEGORY_SELECT",
+          payload: { index, catId: selectedOption.value },
+        });
+        break;
+      case "subCategory":
+        // dispatchDropdownOptions({
+        //   type: "SUBCATEGORY_SELECT",
+        //   payload: { subCatId: selectedOption.value },
+        // });
+        break;
+    }
   };
-  const options = [
-    { value: "cat1", label: "Cat1" },
-    { value: "cat2", label: "Cat2" },
-  ];
 
-  const handleValueChange = (newValue: DateValueType) => {
+  /* Date change event handler */
+  const handleDateChange = (newValue: DateValueType) => {
     console.log("newValue:", newValue);
     setTimesheetDate(newValue);
   };
 
   console.log("categoryData", categoryData);
   console.log("dropdownOptions", dropdownOptions);
+  console.log("Form errors", errors);
 
   const addRow = () => {
     append({
@@ -177,7 +200,7 @@ export const TimesheetForm = () => {
                       asSingle={true}
                       useRange={false}
                       value={timesheetDate}
-                      onChange={handleValueChange}
+                      onChange={handleDateChange}
                       maxDate={new Date()}
                       displayFormat={"DD/MM/YYYY"}
                       readOnly={true}
@@ -238,7 +261,9 @@ export const TimesheetForm = () => {
                       formState,
                     }) => (
                       <TimePicker
-                        onChange={(value) => handleChange("startTime", value)}
+                        onChange={(value) =>
+                          handleChange(index, "startTime", value)
+                        }
                         value={field.startTime}
                       />
                     )}
@@ -261,7 +286,9 @@ export const TimesheetForm = () => {
                       formState,
                     }) => (
                       <TimePicker
-                        onChange={(value) => handleChange("endTime", value)}
+                        onChange={(value) =>
+                          handleChange(index, "endTime", value)
+                        }
                         value={field.endTime}
                       />
                     )}
@@ -284,8 +311,11 @@ export const TimesheetForm = () => {
                     }) => (
                       <Select
                         primaryColor={"indigo"}
-                        value={cat}
-                        onChange={(value) => handleChange("cat", value)}
+                        placeholder="Select category"
+                        value={timesheetFormData.timeslots[index]?.category}
+                        onChange={(value) =>
+                          handleChange(index, "category", value)
+                        }
                         options={dropdownOptions?.categoryList}
                         classNames={{
                           menuButton: ({ isDisabled }) =>
@@ -312,9 +342,12 @@ export const TimesheetForm = () => {
                     }) => (
                       <Select
                         primaryColor={"indigo"}
-                        value={cat}
-                        onChange={handleChange}
-                        options={options}
+                        placeholder="Select category"
+                        value={timesheetFormData.timeslots[index]?.subCategory}
+                        onChange={(value) =>
+                          handleChange(index, "subCategory", value)
+                        }
+                        options={dropdownOptions?.subCategoryList}
                         classNames={{
                           menuButton: ({ isDisabled }) =>
                             `rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
