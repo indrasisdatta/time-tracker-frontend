@@ -33,3 +33,11 @@
     cursor: not-allowed;
   }
 }
+svg.md\:block {
+  display: inline-block;
+}
+.dark {
+  .react-time-picker__button svg {
+    stroke: #fff;
+  }
+}
