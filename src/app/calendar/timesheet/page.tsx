@@ -5,7 +5,13 @@ import { TimesheetForm } from "./TimesheetForm";
 import "react-datepicker/dist/react-datepicker.css";
 
 const TimesheetEntry = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useReducer, useState } from "react";
+import React, { memo, useEffect, useReducer, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import "../calendar.scss";
@@ -17,11 +17,17 @@ import { useQuery } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
 import { TimesheetPayload } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 
 // type DateField = {
 //   startDate: string | null;
 //   endDate: string | null;
 // };
+
+type DropdownOptions = {
+  categoryList: any;
+  subCategoryList: any;
+};
 
 const defaultDropdownOptions = {
   categoryList: [],
@@ -32,23 +38,27 @@ const defaultTimesheetFormData: TimesheetPayload = {
   timeslots: [],
 };
 
-export const TimesheetForm = () => {
+const TimesheetFormComponent = () => {
   const [timesheetDate, setTimesheetDate] = useState<DateValueType>({
     startDate: null,
     endDate: null,
   });
 
-  const [timesheetFormData, setTimesheetFormData] = useState<TimesheetPayload>(
-    defaultTimesheetFormData
-  );
+  // const [timesheetFormData, setTimesheetFormData] = useState<TimesheetPayload>(
+  //   defaultTimesheetFormData
+  // );
   /* Reducer to store category and subcategory dropdown values */
-  const dropdownOptionsReducer = (state, action) => {
+  const dropdownOptionsReducer = (
+    state: DropdownOptions,
+    action: { type: string; payload: any }
+  ) => {
     switch (action.type) {
       case "CATEGORY_LOAD":
         return { ...state, categoryList: action.payload };
       // case "SUBCATEGORY_LOAD":
       //   break;
       case "CATEGORY_SELECT":
+        console.log("Cat select");
         let subCats = [];
         let matchingCat = state.categoryList.find(
           (cat: any) => cat.value === action.payload.catId
@@ -62,7 +72,10 @@ export const TimesheetForm = () => {
         }
         return {
           ...state,
-          subCategoryList: subCats,
+          subCategoryList: {
+            ...state.subCategoryList,
+            [action.payload.index]: subCats,
+          },
         };
       // case "SUBCATEGORY_SELECT":
       //   break;
@@ -89,15 +102,13 @@ export const TimesheetForm = () => {
     isLoading,
     data: categoryData,
     error,
-  } = useQuery("categoryList", fetchCategories);
+  } = useQuery("categoryList", fetchCategories, {
+    refetchOnWindowFocus: false,
+  });
 
   /* Initialize React hook form */
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TimesheetPayload>(defaultTimesheetFormData);
+  const { register, control, handleSubmit, formState, getValues } =
+    useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
   const {
@@ -154,7 +165,8 @@ export const TimesheetForm = () => {
 
   console.log("categoryData", categoryData);
   console.log("dropdownOptions", dropdownOptions);
-  console.log("Form errors", errors);
+  console.log("Form state", formState);
+  console.log("Form values", getValues());
 
   const addRow = () => {
     append({
@@ -162,7 +174,6 @@ export const TimesheetForm = () => {
       endTime: "",
       category: "",
       subCategory: "",
-      coments: "",
     });
   };
 
@@ -191,16 +202,22 @@ export const TimesheetForm = () => {
                     },
                   }}
                   render={({
-                    field: { onChange, onBlur, value, ref },
-                    fieldState: { invalid, isTouched, isDirty, error },
-                    formState,
+                    field: {
+                      onChange,
+                      // value, ref
+                    },
+                    // fieldState: { invalid, isTouched, isDirty, error },
+                    // formState,
                   }) => (
                     <Datepicker
                       placeholder={"Select date"}
                       asSingle={true}
                       useRange={false}
                       value={timesheetDate}
-                      onChange={handleDateChange}
+                      onChange={(newValue) => {
+                        onChange(newValue?.startDate);
+                        handleDateChange(newValue);
+                      }}
                       maxDate={new Date()}
                       displayFormat={"DD/MM/YYYY"}
                       readOnly={true}
@@ -222,7 +239,7 @@ export const TimesheetForm = () => {
                   <span className="font-normal text-sm">Add entry</span>
                 </button>
                 <button
-                  type="button"
+                  type="submit"
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded  md:w-auto md:d-flex justify-content-right ml-8 pr-3"
                 >
                   <DocumentCheckIcon className="h-4 w-4 hidden md:block" />
@@ -261,10 +278,12 @@ export const TimesheetForm = () => {
                       formState,
                     }) => (
                       <TimePicker
-                        onChange={(value) =>
-                          handleChange(index, "startTime", value)
-                        }
-                        value={field.startTime}
+                        value={value}
+                        onChange={(selectedOption) => {
+                          onChange(selectedOption);
+                          handleChange(index, "startTime", value);
+                        }}
+                        // value={field.startTime}
                       />
                     )}
                   />
@@ -286,10 +305,11 @@ export const TimesheetForm = () => {
                       formState,
                     }) => (
                       <TimePicker
-                        onChange={(value) =>
-                          handleChange(index, "endTime", value)
-                        }
-                        value={field.endTime}
+                        value={value}
+                        onChange={(selectedOption) => {
+                          onChange(selectedOption);
+                          handleChange(index, "endTime", value);
+                        }}
                       />
                     )}
                   />
@@ -312,13 +332,15 @@ export const TimesheetForm = () => {
                       <Select
                         primaryColor={"indigo"}
                         placeholder="Select category"
-                        value={timesheetFormData.timeslots[index]?.category}
-                        onChange={(value) =>
-                          handleChange(index, "category", value)
-                        }
+                        value={value as any as SelectValue}
+                        // value={timesheetFormData.timeslots[index]?.category}
+                        onChange={(selectedOption) => {
+                          onChange(selectedOption);
+                          handleChange(index, "category", selectedOption);
+                        }}
                         options={dropdownOptions?.categoryList}
                         classNames={{
-                          menuButton: ({ isDisabled }) =>
+                          menuButton: () =>
                             `rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
                         }}
                       />
@@ -342,14 +364,16 @@ export const TimesheetForm = () => {
                     }) => (
                       <Select
                         primaryColor={"indigo"}
-                        placeholder="Select category"
-                        value={timesheetFormData.timeslots[index]?.subCategory}
-                        onChange={(value) =>
-                          handleChange(index, "subCategory", value)
-                        }
-                        options={dropdownOptions?.subCategoryList}
+                        placeholder="Select sub-category"
+                        // value={timesheetFormData.timeslots[index]?.subCategory}
+                        value={value as any as SelectValue}
+                        onChange={(selectedOption) => {
+                          onChange(selectedOption);
+                          handleChange(index, "subCategory", selectedOption);
+                        }}
+                        options={dropdownOptions?.subCategoryList?.[index]}
                         classNames={{
-                          menuButton: ({ isDisabled }) =>
+                          menuButton: () =>
                             `rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
                           // `flex text-sm text-gray-500 border border-gray-300 rounded shadow-sm transition-all duration-300 focus:outline-none ${
                           //   isDisabled
@@ -389,3 +413,5 @@ export const TimesheetForm = () => {
     </div>
   );
 };
+
+export const TimesheetForm = memo(TimesheetFormComponent);

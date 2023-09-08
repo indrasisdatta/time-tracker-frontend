@@ -3,7 +3,7 @@ export interface Timeslot {
   endTime: string;
   category: string;
   subCategory: string;
-  coments?: string;
+  comments?: string;
 }
 export type TimesheetPayload = {
   timesheetDate: string;
