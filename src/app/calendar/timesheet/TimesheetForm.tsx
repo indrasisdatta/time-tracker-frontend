@@ -19,11 +19,6 @@ import { TimesheetPayload } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 
-// type DateField = {
-//   startDate: string | null;
-//   endDate: string | null;
-// };
-
 type DropdownOptions = {
   categoryList: any;
   subCategoryList: any;
@@ -70,12 +65,11 @@ const TimesheetFormComponent = () => {
           }));
           subCats;
         }
+        const subcatList = structuredClone(state.subCategoryList);
+        subcatList[action.payload.index] = subCats;
         return {
           ...state,
-          subCategoryList: {
-            ...state.subCategoryList,
-            [action.payload.index]: subCats,
-          },
+          subCategoryList: subcatList,
         };
       // case "SUBCATEGORY_SELECT":
       //   break;
@@ -163,14 +157,22 @@ const TimesheetFormComponent = () => {
     setTimesheetDate(newValue);
   };
 
+  const formValues = getValues();
+
   console.log("categoryData", categoryData);
   console.log("dropdownOptions", dropdownOptions);
   console.log("Form state", formState);
-  console.log("Form values", getValues());
+  console.log("Form values", formValues);
 
   const addRow = () => {
+    /* Next row start time should match prev row end time */
+    const timeslotsLen = formValues.timeslots.length;
+    let startTime = "";
+    if (timeslotsLen > 0) {
+      startTime = formValues.timeslots[timeslotsLen - 1].endTime;
+    }
     append({
-      startTime: "",
+      startTime,
       endTime: "",
       category: "",
       subCategory: "",
@@ -240,7 +242,11 @@ const TimesheetFormComponent = () => {
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded  md:w-auto md:d-flex justify-content-right ml-8 pr-3"
+                  disabled={
+                    !timesheetDate?.startDate ||
+                    formValues.timeslots.length == 0
+                  }
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
                 >
                   <DocumentCheckIcon className="h-4 w-4 hidden md:block" />
                   <span className="font-normal text-sm ml-1">Save</span>
@@ -279,6 +285,8 @@ const TimesheetFormComponent = () => {
                     }) => (
                       <TimePicker
                         value={value}
+                        className="rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-sm ring-gray-300"
+                        format="HH:mm"
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
                           handleChange(index, "startTime", value);
@@ -306,6 +314,8 @@ const TimesheetFormComponent = () => {
                     }) => (
                       <TimePicker
                         value={value}
+                        className="rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-sm ring-gray-300"
+                        format="HH:mm"
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
                           handleChange(index, "endTime", value);
@@ -341,7 +351,16 @@ const TimesheetFormComponent = () => {
                         options={dropdownOptions?.categoryList}
                         classNames={{
                           menuButton: () =>
-                            `rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
+                          list: "opt-div",
+                          listItem: ({ isSelected }: any) =>
+                            `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
+                              isSelected
+                                ? `text-white bg-blue-500`
+                                : `text-gray-900 dark:text-gray-200 
+                                hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
+                            }`,
                         }}
                       />
                     )}
@@ -371,10 +390,25 @@ const TimesheetFormComponent = () => {
                           onChange(selectedOption);
                           handleChange(index, "subCategory", selectedOption);
                         }}
-                        options={dropdownOptions?.subCategoryList?.[index]}
+                        isDisabled={
+                          !dropdownOptions ||
+                          !dropdownOptions?.subCategoryList ||
+                          dropdownOptions?.subCategoryList?.length === 0
+                            ? true
+                            : false
+                        }
+                        options={[{ label: "s1", value: "s1" }]}
+                        // options={
+                        //   dropdownOptions?.subCategoryList?.length > 0
+                        //     ? dropdownOptions?.subCategoryList[index]
+                        //     : []
+                        // }
                         classNames={{
                           menuButton: () =>
-                            `rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
+                          list: "opt-div",
+
                           // `flex text-sm text-gray-500 border border-gray-300 rounded shadow-sm transition-all duration-300 focus:outline-none ${
                           //   isDisabled
                           //     ? "bg-gray-200"

@@ -41,3 +41,21 @@ svg.md\:block {
     stroke: #fff;
   }
 }
+.timeslot-row {
+  .react-time-picker {
+    display: flex;
+  }
+  .react-time-picker__wrapper {
+    border: none;
+    padding: 0.3rem;
+    .react-time-picker__inputGroup {
+      font-size: 0.9rem;
+    }
+  }
+  .select-text > div > p {
+    font-size: 0.875rem;
+  }
+  .opt-div > div {
+    padding: 0;
+  }
+}
