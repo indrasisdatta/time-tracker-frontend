@@ -31,6 +31,12 @@ const defaultDropdownOptions = {
 const defaultTimesheetFormData: TimesheetPayload = {
   timesheetDate: "",
   timeslots: [],
+  // timeslots: [{
+  //   startTime: "",
+  //   endTime: "",
+  //   category: "",
+  //   subCategory: '',
+  // }],
 };
 
 const TimesheetFormComponent = () => {
@@ -101,8 +107,13 @@ const TimesheetFormComponent = () => {
   });
 
   /* Initialize React hook form */
-  const { register, control, handleSubmit, formState, getValues } =
-    useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
   const {
@@ -161,7 +172,7 @@ const TimesheetFormComponent = () => {
 
   console.log("categoryData", categoryData);
   console.log("dropdownOptions", dropdownOptions);
-  console.log("Form state", formState);
+  console.log("Form errors", errors);
   console.log("Form values", formValues);
 
   const addRow = () => {
@@ -179,8 +190,25 @@ const TimesheetFormComponent = () => {
     });
   };
 
-  const onSubmit = () => {
-    console.log("Form submitted");
+  const onSubmit = async () => {
+    setTimeout(() => {
+      console.log("Form submitted errors", errors);
+    }, 500);
+  };
+
+  const hasError = (field: string) => {
+    console.log("Check hasError", field, errors);
+    if (field.includes("timeslots")) {
+      const [fieldName, index, subField] = field.split(".");
+      if (
+        errors &&
+        errors.hasOwnProperty(fieldName) &&
+        (errors as any)?.[fieldName]?.[index][subField]
+      ) {
+        return true;
+      }
+    }
+    return errors && field in errors;
   };
 
   return (
@@ -225,17 +253,28 @@ const TimesheetFormComponent = () => {
                       readOnly={true}
                       //   focus-within:ring-1 focus-within:ring-inset
                       inputClassName="w-full flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md  focus-visible:outline-none"
-                      containerClassName={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`}
+                      containerClassName={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
+                        hasError("timesheetDate")
+                          ? "ring-red-600"
+                          : "ring-gray-300"
+                      }`}
+                      //  ring-gray-300
                       toggleClassName="mr-2 mb-1"
                     />
                   )}
                 />
+                {errors?.timesheetDate && (
+                  <span className="inline-flex text-sm text-red-700">
+                    {errors?.timesheetDate?.message}
+                  </span>
+                )}
               </div>
               <div className="w-full md:w-1/2  mt-2 md:mt-0">
                 <button
                   type="button"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
                   onClick={addRow}
+                  disabled={!timesheetDate?.startDate}
                 >
                   <PlusIcon className="h-4 w-4 hidden md:block" />
                   <span className="font-normal text-sm">Add entry</span>
@@ -277,6 +316,54 @@ const TimesheetFormComponent = () => {
                         value: true,
                         message: "Select start time",
                       },
+                      validate: () => {
+                        const validateObj = {
+                          value: true,
+                          message: "",
+                        };
+                        // console.log(
+                        //   "Start time validate",
+                        //   getValues(`timeslots.${index}.startTime`),
+                        //   getValues(`timeslots.${index}.endTime`)
+                        // );
+                        let currStartTime = getValues(
+                          `timeslots.${index}.startTime`
+                        );
+                        let currEndTime = getValues(
+                          `timeslots.${index}.endTime`
+                        );
+                        if (
+                          !!currStartTime &&
+                          !!currEndTime &&
+                          currStartTime > currEndTime
+                        ) {
+                          validateObj.value = false;
+                          validateObj.message =
+                            "Start time cannot be greater than end time";
+                        }
+                        if (index > 0) {
+                          let nextStartTime = getValues(
+                            `timeslots.${Number(index) + 1}.startTime`
+                          );
+                          console.log(
+                            "Validate next start time",
+                            nextStartTime,
+                            currEndTime
+                          );
+                          if (
+                            !!nextStartTime &&
+                            !!currEndTime &&
+                            nextStartTime > currEndTime
+                          ) {
+                            validateObj.value = false;
+                            validateObj.message = `There cannot be a gap between previous end time ${currEndTime} and next start time ${nextStartTime}.`;
+                          }
+                        }
+                        console.log("Validate obj startTime", validateObj);
+                        return validateObj.message.length > 0
+                          ? validateObj.message
+                          : true;
+                      },
                     }}
                     render={({
                       field: { onChange, onBlur, value, ref },
@@ -285,7 +372,11 @@ const TimesheetFormComponent = () => {
                     }) => (
                       <TimePicker
                         value={value}
-                        className="rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-sm ring-gray-300"
+                        className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
+                          hasError(`timeslots.${index}.startTime`)
+                            ? "ring-red-600"
+                            : "ring-gray-300"
+                        }`}
                         format="HH:mm"
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
@@ -295,6 +386,11 @@ const TimesheetFormComponent = () => {
                       />
                     )}
                   />
+                  {errors?.timeslots && errors?.timeslots[index]?.startTime && (
+                    <span className="inline-flex text-sm text-red-700">
+                      {errors?.timeslots[index]?.startTime?.message}
+                    </span>
+                  )}
                 </div>
                 {/* End time */}
                 <div className="w-full md:w-2/12">
@@ -314,7 +410,11 @@ const TimesheetFormComponent = () => {
                     }) => (
                       <TimePicker
                         value={value}
-                        className="rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-sm ring-gray-300"
+                        className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
+                          hasError(`timeslots.${index}.endTime`)
+                            ? "ring-red-600"
+                            : "ring-gray-300"
+                        }`}
                         format="HH:mm"
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
@@ -323,6 +423,11 @@ const TimesheetFormComponent = () => {
                       />
                     )}
                   />
+                  {errors?.timeslots && errors?.timeslots[index]?.endTime && (
+                    <span className="inline-flex text-sm text-red-700">
+                      {errors?.timeslots[index]?.endTime?.message}
+                    </span>
+                  )}
                 </div>
                 <div className="w-full md:w-2/12">
                   <Controller
@@ -351,7 +456,11 @@ const TimesheetFormComponent = () => {
                         options={dropdownOptions?.categoryList}
                         classNames={{
                           menuButton: () =>
-                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
+                              hasError(`timeslots.${index}.startTime`)
+                                ? "ring-red-600"
+                                : "ring-gray-300"
+                            }`,
                           menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
                           list: "opt-div",
                           listItem: ({ isSelected }: any) =>
@@ -365,6 +474,11 @@ const TimesheetFormComponent = () => {
                       />
                     )}
                   />
+                  {errors?.timeslots && errors?.timeslots[index]?.category && (
+                    <span className="inline-flex text-sm text-red-700">
+                      {errors?.timeslots[index]?.category?.message}
+                    </span>
+                  )}
                 </div>
                 <div className="w-full md:w-3/12">
                   <Controller
@@ -405,7 +519,11 @@ const TimesheetFormComponent = () => {
                         // }
                         classNames={{
                           menuButton: () =>
-                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ring-gray-300`,
+                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
+                              hasError(`timeslots.${index}.startTime`)
+                                ? "ring-red-600"
+                                : "ring-gray-300"
+                            }`,
                           menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
                           list: "opt-div",
 
@@ -425,6 +543,12 @@ const TimesheetFormComponent = () => {
                       />
                     )}
                   />
+                  {errors?.timeslots &&
+                    errors?.timeslots[index]?.subCategory && (
+                      <span className="inline-flex text-sm text-red-700">
+                        {errors?.timeslots[index]?.subCategory?.message}
+                      </span>
+                    )}
                 </div>
                 <div className="w-full md:w-1/12">1 hr</div>
                 <div className="w-full md:w-1/12">
