@@ -31,12 +31,6 @@ const defaultDropdownOptions = {
 const defaultTimesheetFormData: TimesheetPayload = {
   timesheetDate: "",
   timeslots: [],
-  // timeslots: [{
-  //   startTime: "",
-  //   endTime: "",
-  //   category: "",
-  //   subCategory: '',
-  // }],
 };
 
 const TimesheetFormComponent = () => {
@@ -203,7 +197,7 @@ const TimesheetFormComponent = () => {
       if (
         errors &&
         errors.hasOwnProperty(fieldName) &&
-        (errors as any)?.[fieldName]?.[index][subField]
+        (errors as any)?.[fieldName]?.[index]?.[subField]
       ) {
         return true;
       }
@@ -321,11 +315,6 @@ const TimesheetFormComponent = () => {
                           value: true,
                           message: "",
                         };
-                        // console.log(
-                        //   "Start time validate",
-                        //   getValues(`timeslots.${index}.startTime`),
-                        //   getValues(`timeslots.${index}.endTime`)
-                        // );
                         let currStartTime = getValues(
                           `timeslots.${index}.startTime`
                         );
@@ -342,21 +331,19 @@ const TimesheetFormComponent = () => {
                             "Start time cannot be greater than end time";
                         }
                         if (index > 0) {
-                          let nextStartTime = getValues(
-                            `timeslots.${Number(index) + 1}.startTime`
+                          let prevEndTime = getValues(
+                            `timeslots.${Number(index) - 1}.endTime`
                           );
                           console.log(
-                            "Validate next start time",
-                            nextStartTime,
-                            currEndTime
+                            `Row ${index} Validate prev end time ${prevEndTime} with current start time ${currStartTime}`
                           );
                           if (
-                            !!nextStartTime &&
-                            !!currEndTime &&
-                            nextStartTime > currEndTime
+                            !!currStartTime &&
+                            !!prevEndTime &&
+                            currStartTime !== prevEndTime
                           ) {
                             validateObj.value = false;
-                            validateObj.message = `There cannot be a gap between previous end time ${currEndTime} and next start time ${nextStartTime}.`;
+                            validateObj.message = `Not matching previous end time ${prevEndTime}`;
                           }
                         }
                         console.log("Validate obj startTime", validateObj);
