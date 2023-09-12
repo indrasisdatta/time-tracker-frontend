@@ -1,6 +1,6 @@
 "use client";
 import React, { memo, useEffect, useReducer, useState } from "react";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import "../calendar.scss";
 import {
@@ -13,11 +13,15 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import Select from "react-tailwindcss-select";
 import { getCategories } from "@/services/CategoryService";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
 import { TimesheetPayload } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
+import { calculateTimeDifference } from "@/utils/helper";
+import { Loader } from "@/app/common/components/Loader";
+import { useRouter } from "next/router";
+import { redirect } from "next/navigation";
 
 type DropdownOptions = {
   categoryList: any;
@@ -39,9 +43,40 @@ const TimesheetFormComponent = () => {
     endDate: null,
   });
 
-  // const [timesheetFormData, setTimesheetFormData] = useState<TimesheetPayload>(
-  //   defaultTimesheetFormData
-  // );
+  const saveTimesheet = async (payload: TimesheetPayload): Promise<any> => {
+    const { data } = await saveTimesheet(payload);
+    return data;
+  };
+
+  const {
+    mutate,
+    data: savedData,
+    isLoading: isLoadingSave,
+    isError: isSaveError,
+    error: saveError,
+  } = useMutation(saveTimesheet);
+
+  /* Based on form submit API response, show error toast or redirect */
+  if (isSaveError) {
+    toast.error(
+      `Error: ${(saveError as any).response?.data?.error.join(", ")}`,
+      {
+        duration: 5000,
+        style: {
+          maxWidth: "30em",
+        },
+      }
+    );
+  } else if (savedData) {
+    setTimeout(() => {
+      toast.success("Timesheet saved", {
+        position: "top-right",
+        // autoClose: 5000,
+      });
+    }, 1);
+    redirect("/calendar");
+  }
+
   /* Reducer to store category and subcategory dropdown values */
   const dropdownOptionsReducer = (
     state: DropdownOptions,
@@ -54,16 +89,14 @@ const TimesheetFormComponent = () => {
       //   break;
       case "CATEGORY_SELECT":
         console.log("Cat select");
-        let subCats = [];
+        let subCats: any[] = [];
         let matchingCat = state.categoryList.find(
           (cat: any) => cat.value === action.payload.catId
         );
         if (matchingCat) {
-          subCats = matchingCat.subCategories?.map((subCat: SubCategory) => ({
-            value: subCat._id,
-            label: subCat.name,
-          }));
-          subCats;
+          matchingCat.subCategories?.forEach((subCat: SubCategory) => {
+            subCats.push({ value: subCat._id, label: subCat.name });
+          });
         }
         const subcatList = structuredClone(state.subCategoryList);
         subcatList[action.payload.index] = subCats;
@@ -107,6 +140,7 @@ const TimesheetFormComponent = () => {
     handleSubmit,
     formState: { errors },
     getValues,
+    setValue,
   } = useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
@@ -122,10 +156,12 @@ const TimesheetFormComponent = () => {
   /* Update reducer once category API response is obtained */
   useEffect(() => {
     if (
+      dropdownOptions.categoryList.length === 0 &&
       categoryData &&
       categoryData?.status == 1 &&
       categoryData?.data?.length > 0
     ) {
+      console.log("Category load");
       dispatchDropdownOptions({
         type: "CATEGORY_LOAD",
         payload: categoryData.data.map((cat: Category) => ({
@@ -142,6 +178,8 @@ const TimesheetFormComponent = () => {
     console.log("Change handler:", index, type, selectedOption);
     switch (type) {
       case "category":
+        /* Reset the subcategory value when the category changes */
+        setValue(`timeslots.${index}.subCategory`, "");
         dispatchDropdownOptions({
           type: "CATEGORY_SELECT",
           payload: { index, catId: selectedOption.value },
@@ -184,10 +222,18 @@ const TimesheetFormComponent = () => {
     });
   };
 
-  const onSubmit = async () => {
-    setTimeout(() => {
-      console.log("Form submitted errors", errors);
-    }, 500);
+  const onSubmit = async (formData: TimesheetPayload) => {
+    // console.log("Form submitted errors", errors, formValues, formData);
+    const payload = structuredClone(formData);
+    payload.timeslots?.map((row) => {
+      row.category =
+        typeof row.category === "object" ? row.category?.value : "";
+      row.subCategory =
+        typeof row.subCategory === "object" ? row.subCategory?.value : "";
+      // row.comments = null;
+    });
+    console.log("Payload: ", payload);
+    mutate(payload);
   };
 
   const hasError = (field: string) => {
@@ -205,10 +251,25 @@ const TimesheetFormComponent = () => {
     return errors && field in errors;
   };
 
+  /* Show sub cat selected value only if it's present in dropdown list */
+  const subCatSelectedValue = (index: number, value: any): SelectValue => {
+    if (
+      dropdownOptions?.subCategoryList?.length > 0 &&
+      typeof dropdownOptions?.subCategoryList[index] !== "undefined" &&
+      value
+    ) {
+      const subCatPresent = dropdownOptions?.subCategoryList[index].find(
+        (subCat: any) => subCat.value === value.value
+      );
+      return subCatPresent;
+    }
+    return null;
+  };
+
   return (
     <div>
       <Toaster />
-      {/* {isLoading && <Loader className="m-auto mt-3" />} */}
+      {isLoadingSave && <Loader className="m-auto mt-3" />}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="flex">
           {/* Col 1: form inputs */}
@@ -277,7 +338,8 @@ const TimesheetFormComponent = () => {
                   type="submit"
                   disabled={
                     !timesheetDate?.startDate ||
-                    formValues.timeslots.length == 0
+                    formValues.timeslots.length == 0 ||
+                    isLoadingSave
                   }
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
                 >
@@ -288,7 +350,7 @@ const TimesheetFormComponent = () => {
             </div>
             {/* Timesheet enry headings */}
             {timeslotFields && timeslotFields.length > 0 && (
-              <div className="flex gap-x-12 text-center">
+              <div className="flex gap-x-12 text-center mb-2">
                 <div className="w-full md:w-2/12">Start time</div>
                 <div className="w-full md:w-2/12">End time</div>
                 <div className="w-full md:w-2/12">Category</div>
@@ -299,7 +361,7 @@ const TimesheetFormComponent = () => {
             )}
             {/* Timesheet enry input rows */}
             {timeslotFields.map((field, index) => (
-              <div key={field.id} className="flex timeslot-row gap-x-2">
+              <div key={field.id} className="flex timeslot-row gap-x-2 mb-3">
                 {/* Start time */}
                 <div className="w-full md:w-2/12">
                   <Controller
@@ -435,7 +497,6 @@ const TimesheetFormComponent = () => {
                         primaryColor={"indigo"}
                         placeholder="Select category"
                         value={value as any as SelectValue}
-                        // value={timesheetFormData.timeslots[index]?.category}
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
                           handleChange(index, "category", selectedOption);
@@ -444,12 +505,12 @@ const TimesheetFormComponent = () => {
                         classNames={{
                           menuButton: () =>
                             `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
-                              hasError(`timeslots.${index}.startTime`)
+                              hasError(`timeslots.${index}.category`)
                                 ? "ring-red-600"
                                 : "ring-gray-300"
                             }`,
-                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
-                          list: "opt-div",
+                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-dark",
+                          list: "opt-div dark:bg-dark",
                           listItem: ({ isSelected }: any) =>
                             `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
                               isSelected
@@ -485,8 +546,8 @@ const TimesheetFormComponent = () => {
                       <Select
                         primaryColor={"indigo"}
                         placeholder="Select sub-category"
-                        // value={timesheetFormData.timeslots[index]?.subCategory}
-                        value={value as any as SelectValue}
+                        // value={value as any as SelectValue}
+                        value={subCatSelectedValue(index, value)}
                         onChange={(selectedOption) => {
                           onChange(selectedOption);
                           handleChange(index, "subCategory", selectedOption);
@@ -494,38 +555,36 @@ const TimesheetFormComponent = () => {
                         isDisabled={
                           !dropdownOptions ||
                           !dropdownOptions?.subCategoryList ||
-                          dropdownOptions?.subCategoryList?.length === 0
+                          dropdownOptions?.subCategoryList?.length === 0 ||
+                          (dropdownOptions?.subCategoryList?.length > 0 &&
+                            typeof dropdownOptions?.subCategoryList[index] ===
+                              "undefined")
                             ? true
                             : false
                         }
-                        options={[{ label: "s1", value: "s1" }]}
-                        // options={
-                        //   dropdownOptions?.subCategoryList?.length > 0
-                        //     ? dropdownOptions?.subCategoryList[index]
-                        //     : []
-                        // }
+                        options={
+                          dropdownOptions?.subCategoryList?.length > 0 &&
+                          typeof dropdownOptions?.subCategoryList[index] !==
+                            "undefined"
+                            ? dropdownOptions?.subCategoryList[index]
+                            : []
+                        }
                         classNames={{
                           menuButton: () =>
                             `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
-                              hasError(`timeslots.${index}.startTime`)
+                              hasError(`timeslots.${index}.subCategory`)
                                 ? "ring-red-600"
                                 : "ring-gray-300"
                             }`,
                           menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
                           list: "opt-div",
-
-                          // `flex text-sm text-gray-500 border border-gray-300 rounded shadow-sm transition-all duration-300 focus:outline-none ${
-                          //   isDisabled
-                          //     ? "bg-gray-200"
-                          //     : "bg-white hover:border-gray-400 focus:border-blue-500 focus:ring focus:ring-blue-500/20"
-                          // }`,
-                          // menu: "absolute z-10 w-full bg-white shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-700",
-                          // listItem: ({ isSelected }) =>
-                          //   `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
-                          //     isSelected
-                          //       ? `text-white bg-blue-500`
-                          //       : `text-gray-500 hover:bg-blue-100 hover:text-blue-500`
-                          //   }`,
+                          listItem: ({ isSelected }: any) =>
+                            `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
+                              isSelected
+                                ? `text-white bg-blue-500`
+                                : `text-gray-900 dark:text-gray-200 
+                                hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
+                            }`,
                         }}
                       />
                     )}
@@ -537,7 +596,15 @@ const TimesheetFormComponent = () => {
                       </span>
                     )}
                 </div>
-                <div className="w-full md:w-1/12">1 hr</div>
+                <div className="w-full md:w-1/12 flex justify-center items-center">
+                  <span>
+                    {calculateTimeDifference(
+                      formValues.timeslots[index].startTime,
+                      formValues.timeslots[index].endTime,
+                      true
+                    )}
+                  </span>
+                </div>
                 <div className="w-full md:w-1/12">
                   <button
                     type="button"

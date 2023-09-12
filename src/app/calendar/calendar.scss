@@ -36,9 +36,15 @@
 svg.md\:block {
   display: inline-block;
 }
+.opt-div {
+  background-color: #fff;
+}
 .dark {
   .react-time-picker__button svg {
     stroke: #fff;
+  }
+  .opt-div {
+    background-color: rgb(31 41 55);
   }
 }
 .timeslot-row {
@@ -52,6 +58,7 @@ svg.md\:block {
       font-size: 0.9rem;
     }
   }
+
   .select-text > div > p {
     font-size: 0.875rem;
   }
