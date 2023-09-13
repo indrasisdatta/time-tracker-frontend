@@ -22,6 +22,7 @@ import { calculateTimeDifference } from "@/utils/helper";
 import { Loader } from "@/app/common/components/Loader";
 import { useRouter } from "next/router";
 import { redirect } from "next/navigation";
+import { saveTimesheet } from "@/services/TimesheetService";
 
 type DropdownOptions = {
   categoryList: any;
@@ -43,7 +44,7 @@ const TimesheetFormComponent = () => {
     endDate: null,
   });
 
-  const saveTimesheet = async (payload: TimesheetPayload): Promise<any> => {
+  const saveTimesheetApi = async (payload: TimesheetPayload): Promise<any> => {
     const { data } = await saveTimesheet(payload);
     return data;
   };
@@ -54,7 +55,14 @@ const TimesheetFormComponent = () => {
     isLoading: isLoadingSave,
     isError: isSaveError,
     error: saveError,
-  } = useMutation(saveTimesheet);
+  } = useMutation(saveTimesheetApi, {
+    // onSuccess: () => {
+    //   toast.success("Timesheet saved", {
+    //     position: "top-right",
+    //   });
+    //   redirect("/calendar");
+    // },
+  });
 
   /* Based on form submit API response, show error toast or redirect */
   if (isSaveError) {
@@ -222,7 +230,7 @@ const TimesheetFormComponent = () => {
     });
   };
 
-  const onSubmit = async (formData: TimesheetPayload) => {
+  const onSubmit = (formData: TimesheetPayload) => {
     // console.log("Form submitted errors", errors, formValues, formData);
     const payload = structuredClone(formData);
     payload.timeslots?.map((row) => {
