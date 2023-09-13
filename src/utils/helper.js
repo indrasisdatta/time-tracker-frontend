@@ -38,7 +38,10 @@ export const calculateTimeDifference = (
   if (timeDiffMinutes < 0) {
     return null;
   }
+  return convertToHrMin(timeDiffMinutes, shorthand);
+};
 
+export const convertToHrMin = (timeDiffMinutes, shorthand) => {
   // Calculate hours and minutes
   const hours = Math.floor(timeDiffMinutes / 60);
   const minutes = timeDiffMinutes % 60;
@@ -46,7 +49,7 @@ export const calculateTimeDifference = (
   // Format the output
   let result = "";
   if (hours > 0) {
-    result += `${hours}` + (shorthand ? `h` : `hour${hours !== 1 ? "s" : ""}`);
+    result += `${hours}` + (shorthand ? `h` : ` hr${hours !== 1 ? "s" : ""}`);
   }
   if (minutes > 0) {
     result +=
@@ -54,4 +57,38 @@ export const calculateTimeDifference = (
   }
 
   return result.trim();
+};
+
+/**
+ * Calculate summary to show total time for each subcategory
+ * @param {*} formValues - As per Timesheet form
+ * @returns object
+ */
+export const summaryTime = (formValues) => {
+  let summary = {};
+  formValues.timeslots.map((form) => {
+    /* Required data for summary time calculation */
+    if (
+      !form.startTime ||
+      !form.endTime ||
+      !form.category ||
+      !form.subCategory
+    ) {
+      return;
+    }
+    let currDate = formValues.timesheetDate;
+    const startTime = new Date(`${currDate} ${form.startTime}`);
+    const endTime = new Date(`${currDate} ${form.endTime}`);
+    const diff = (endTime - startTime) / (60 * 1000);
+    /* Create category index if not present */
+    if (!summary.hasOwnProperty(form.category.label)) {
+      summary[form.category.label] = {};
+    }
+    /* Create subcategory index if not present */
+    if (!summary[form.category.label].hasOwnProperty(form.subCategory.label)) {
+      summary[form.category.label][form.subCategory.label] = 0;
+    }
+    summary[form.category.label][form.subCategory.label] += diff;
+  });
+  return summary;
 };

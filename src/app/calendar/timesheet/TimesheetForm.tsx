@@ -18,11 +18,12 @@ import { Category, SubCategory } from "@/models/Category";
 import { TimesheetPayload } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
-import { calculateTimeDifference } from "@/utils/helper";
+import { calculateTimeDifference, summaryTime } from "@/utils/helper";
 import { Loader } from "@/app/common/components/Loader";
 import { useRouter } from "next/router";
 import { redirect } from "next/navigation";
 import { saveTimesheet } from "@/services/TimesheetService";
+import TimesheetSummary from "./TimesheetSummary";
 
 type DropdownOptions = {
   categoryList: any;
@@ -627,7 +628,9 @@ const TimesheetFormComponent = () => {
             ))}
           </div>
           {/* Col 2: Summary generated based on inputs */}
-          <div className="w-full md:w-2/12">Summary</div>
+          <div className="w-full md:w-2/12">
+            <TimesheetSummary formValues={formValues} />
+          </div>
         </div>
       </form>
     </div>
