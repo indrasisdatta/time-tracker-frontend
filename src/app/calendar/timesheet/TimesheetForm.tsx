@@ -1,7 +1,10 @@
 "use client";
 import React, { memo, useEffect, useReducer, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
+import Datepicker, {
+  DateType,
+  DateValueType,
+} from "react-tailwindcss-datepicker";
 import "../calendar.scss";
 import {
   DocumentCheckIcon,
@@ -13,17 +16,26 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import Select from "react-tailwindcss-select";
 import { getCategories } from "@/services/CategoryService";
-import { useMutation, useQuery } from "react-query";
+import {
+  QueryFunctionContext,
+  QueryKey,
+  useMutation,
+  useQuery,
+} from "react-query";
 import { Category, SubCategory } from "@/models/Category";
-import { TimesheetPayload } from "@/models/Timesheet";
+import { TimesheetPayload, Timeslot } from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { calculateTimeDifference, summaryTime } from "@/utils/helper";
 import { Loader } from "@/app/common/components/Loader";
 import { useRouter } from "next/router";
 import { redirect } from "next/navigation";
-import { saveTimesheet } from "@/services/TimesheetService";
+import {
+  getTimesheetDatewise,
+  saveTimesheet,
+} from "@/services/TimesheetService";
 import TimesheetSummary from "./TimesheetSummary";
+import moment from "moment";
 
 type DropdownOptions = {
   categoryList: any;
@@ -65,6 +77,38 @@ const TimesheetFormComponent = () => {
     // },
   });
 
+  /* Fetch timesheet data based on selected date */
+  const getTimesheetDatewiseApi = async ({
+    queryKey,
+  }: {
+    queryKey: QueryKey;
+  }): Promise<any> => {
+    // console.log("getTimesheetDatewiseApi Query params", queryKey[1]);
+    if (
+      queryKey[1] &&
+      queryKey[1].hasOwnProperty("startDate") &&
+      (queryKey[1] as any)?.startDate
+    ) {
+      const { data } = await getTimesheetDatewise(
+        timesheetDate?.startDate?.toString() || ""
+      );
+      return data;
+    }
+  };
+  /* Store API result in 'timesheetData' key and destructure returned object */
+  const {
+    isSuccess: isSuccessTimesheetData,
+    isError: isErrorTimesheetData,
+    isLoading: isLoadingTimesheetData,
+    data: timesheetData,
+    error: errorTimesheetData,
+    refetch: refetchTimesheetData,
+  } = useQuery(["timesheetData", timesheetDate], getTimesheetDatewiseApi, {
+    // refetchOnWindowFocus: false,
+    // enabled: false,
+    // manual: true,
+  });
+
   /* Based on form submit API response, show error toast or redirect */
   if (isSaveError) {
     toast.error(
@@ -94,8 +138,6 @@ const TimesheetFormComponent = () => {
     switch (action.type) {
       case "CATEGORY_LOAD":
         return { ...state, categoryList: action.payload };
-      // case "SUBCATEGORY_LOAD":
-      //   break;
       case "CATEGORY_SELECT":
         console.log("Cat select");
         let subCats: any[] = [];
@@ -113,10 +155,6 @@ const TimesheetFormComponent = () => {
           ...state,
           subCategoryList: subcatList,
         };
-      // case "SUBCATEGORY_SELECT":
-      //   break;
-      // case "UPDATE":
-      //   break;
       default:
         return state;
     }
@@ -150,6 +188,7 @@ const TimesheetFormComponent = () => {
     formState: { errors },
     getValues,
     setValue,
+    reset,
   } = useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
@@ -161,6 +200,57 @@ const TimesheetFormComponent = () => {
     control,
     name: "timeslots",
   });
+
+  /* Every time timesheet API data is fetched, update form to populate data */
+  useEffect(() => {
+    if (
+      timesheetData &&
+      timesheetData?.status === 1 &&
+      timesheetData?.data?.length > 0
+    ) {
+      const savedTimeslots = timesheetData.data.map(
+        (
+          {
+            startTimeLocal,
+            endTimeLocal,
+            category,
+            subCategory,
+          }: {
+            startTimeLocal: Date;
+            endTimeLocal: Date;
+            category: Category;
+            subCategory: string;
+          },
+          index: number
+        ) => {
+          /* Dispatch category select so that subcat dropdown options are populated */
+          dispatchDropdownOptions({
+            type: "CATEGORY_SELECT",
+            payload: { index, catId: category._id },
+          });
+          return {
+            startTime: moment(startTimeLocal).format("HH:mm"),
+            endTime: moment(endTimeLocal).format("HH:mm"),
+            category: { value: category._id, label: category.name },
+            subCategory: category?.subCategories
+              .filter((subCat) => subCat._id === subCategory)
+              .map((subCat) => ({
+                value: subCat._id,
+                label: subCat.name,
+              }))[0],
+          };
+        }
+      );
+      reset({
+        timesheetDate: moment(timesheetData.data[0].timesheetDate).format(
+          "YYYY-MM-DD"
+        ),
+        timeslots: savedTimeslots,
+      });
+    } else {
+      reset(defaultTimesheetFormData);
+    }
+  }, [timesheetData]);
 
   /* Update reducer once category API response is obtained */
   useEffect(() => {
@@ -207,6 +297,7 @@ const TimesheetFormComponent = () => {
   const handleDateChange = (newValue: DateValueType) => {
     console.log("newValue:", newValue);
     setTimesheetDate(newValue);
+    refetchTimesheetData();
   };
 
   const formValues = getValues();
@@ -215,6 +306,7 @@ const TimesheetFormComponent = () => {
   console.log("dropdownOptions", dropdownOptions);
   console.log("Form errors", errors);
   console.log("Form values", formValues);
+  console.log("Timesheet data", timesheetData);
 
   const addRow = () => {
     /* Next row start time should match prev row end time */
@@ -607,11 +699,13 @@ const TimesheetFormComponent = () => {
                 </div>
                 <div className="w-full md:w-1/12 flex justify-center items-center">
                   <span>
-                    {calculateTimeDifference(
-                      formValues.timeslots[index].startTime,
-                      formValues.timeslots[index].endTime,
-                      true
-                    )}
+                    {formValues.timeslots &&
+                      formValues.timeslots.length > 0 &&
+                      calculateTimeDifference(
+                        formValues.timeslots[index].startTime,
+                        formValues.timeslots[index].endTime,
+                        true
+                      )}
                   </span>
                 </div>
                 <div className="w-full md:w-1/12">
