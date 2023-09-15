@@ -259,7 +259,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                       </span>
                     )}
                 </div>
-                <div className="w-full md:w-8/12 mt-2 md:mt-0">
+                <div className="w-full md:w-6/12 mt-2 md:mt-0">
                   <div
                     className={`${getInputDivClass("subcategoryDescription")}`}
                   >
@@ -270,6 +270,23 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                       {...register(`subCategories.${index}.description` as any)}
                     />
                   </div>
+                </div>
+                <div className="w-full md:w-2/12 mt-2 md:mt-0 flex items-center">
+                  <input
+                    id={`checkbox-${index}`}
+                    type="checkbox"
+                    className="bg-gray-50 border-gray-300 focus:ring-3 focus:ring-indigo-600 h-4 w-4 rounded"
+                    {...register(
+                      `subCategories.${index}.isProductive` as any,
+                      {}
+                    )}
+                  />
+                  <label
+                    htmlFor={`checkbox-${index}`}
+                    className="text-sm ml-3 font-medium text-gray-900 dark:text-gray-200"
+                  >
+                    Productive
+                  </label>
                 </div>
                 <div className="w-full md:w-1/12 mt-2 md:mt-0 md:text-right">
                   {index === 0 && (

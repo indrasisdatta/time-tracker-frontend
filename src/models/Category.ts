@@ -1,6 +1,7 @@
 export interface SubCategory {
   _id: string;
   name: string;
+  isProductive?: boolean;
   description?: string;
 }
 
@@ -14,6 +15,7 @@ export interface Category {
 export interface SubCategoryFormValues {
   _id?: string;
   name: string;
+  isProductive?: boolean;
   description?: string;
 }
 
