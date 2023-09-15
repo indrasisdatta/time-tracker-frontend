@@ -26,3 +26,43 @@
     background-color: var(--color-light);
   }
 }
+.date-container {
+  [disabled].line-through {
+    text-decoration-line: none;
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+}
+svg.md\:block {
+  display: inline-block;
+}
+.opt-div {
+  background-color: #fff;
+}
+.dark {
+  .react-time-picker__button svg {
+    stroke: #fff;
+  }
+  .opt-div {
+    background-color: rgb(31 41 55);
+  }
+}
+.timeslot-row {
+  .react-time-picker {
+    display: flex;
+  }
+  .react-time-picker__wrapper {
+    border: none;
+    padding: 0.3rem;
+    .react-time-picker__inputGroup {
+      font-size: 0.9rem;
+    }
+  }
+
+  .select-text > div > p {
+    font-size: 0.875rem;
+  }
+  .opt-div > div {
+    padding: 0;
+  }
+}
