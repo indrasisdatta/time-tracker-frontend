@@ -275,7 +275,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                   {index === 0 && (
                     <button
                       type="button"
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded w-full md:w-auto md:d-flex justify-content-right"
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-2 rounded w-full md:w-auto md:d-flex justify-content-right"
                       onClick={() => append({ name: "", description: "" })}
                       data-testid={`add-btn-${index}`}
                     >
@@ -306,7 +306,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           <button
             disabled={isLoading}
             type="submit"
-            className="w-full md:w-auto md:d-flex rounded-md block bg-indigo-600 px-3 py-1 text-md text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="rounded-md block bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Save
           </button>

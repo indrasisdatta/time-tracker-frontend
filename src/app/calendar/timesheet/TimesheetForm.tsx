@@ -121,13 +121,8 @@ const TimesheetFormComponent = () => {
       }
     );
   } else if (savedData) {
-    setTimeout(() => {
-      toast.success("Timesheet saved", {
-        position: "top-right",
-        // autoClose: 5000,
-      });
-    }, 1);
-    redirect("/calendar");
+    toast.success("Timesheet saved");
+    // redirect("/calendar");
   }
 
   /* Reducer to store category and subcategory dropdown values */
@@ -425,10 +420,12 @@ const TimesheetFormComponent = () => {
                   </span>
                 )}
               </div>
+              {/* Add row, save buttons starts */}
               <div className="w-full md:w-1/2  mt-2 md:mt-0">
                 <button
                   type="button"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
+                  // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
                   disabled={!timesheetDate?.startDate}
                 >
@@ -442,12 +439,14 @@ const TimesheetFormComponent = () => {
                     formValues.timeslots.length == 0 ||
                     isLoadingSave
                   }
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
+                  // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
                 >
-                  <DocumentCheckIcon className="h-4 w-4 hidden md:block" />
-                  <span className="font-normal text-sm ml-1">Save</span>
+                  {/* <DocumentCheckIcon className="h-4 w-4 hidden md:block" /> */}
+                  <span className="font-normal text-sm">Save</span>
                 </button>
               </div>
+              {/* Add row, save buttons ends */}
             </div>
             {/* Timesheet enry headings */}
             {timeslotFields && timeslotFields.length > 0 && (
@@ -602,6 +601,7 @@ const TimesheetFormComponent = () => {
                           onChange(selectedOption);
                           handleChange(index, "category", selectedOption);
                         }}
+                        isSearchable={true}
                         options={dropdownOptions?.categoryList}
                         classNames={{
                           menuButton: () =>
@@ -610,8 +610,8 @@ const TimesheetFormComponent = () => {
                                 ? "ring-red-600"
                                 : "ring-gray-300"
                             }`,
-                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-dark",
-                          list: "opt-div dark:bg-dark",
+                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
+                          list: "opt-div dark:bg-slate-800",
                           listItem: ({ isSelected }: any) =>
                             `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
                               isSelected
@@ -619,6 +619,8 @@ const TimesheetFormComponent = () => {
                                 : `text-gray-900 dark:text-gray-200 
                                 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
                             }`,
+                          searchBox:
+                            "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
                         }}
                       />
                     )}
@@ -653,6 +655,7 @@ const TimesheetFormComponent = () => {
                           onChange(selectedOption);
                           handleChange(index, "subCategory", selectedOption);
                         }}
+                        isSearchable={true}
                         isDisabled={
                           !dropdownOptions ||
                           !dropdownOptions?.subCategoryList ||
@@ -677,8 +680,8 @@ const TimesheetFormComponent = () => {
                                 ? "ring-red-600"
                                 : "ring-gray-300"
                             }`,
-                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 mt-1.5 text-sm text-gray-900 dark:text-gray-200",
-                          list: "opt-div",
+                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
+                          list: "opt-div dark:bg-slate-800",
                           listItem: ({ isSelected }: any) =>
                             `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
                               isSelected
@@ -686,6 +689,8 @@ const TimesheetFormComponent = () => {
                                 : `text-gray-900 dark:text-gray-200 
                                 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
                             }`,
+                          searchBox:
+                            "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
                         }}
                       />
                     )}
@@ -711,7 +716,8 @@ const TimesheetFormComponent = () => {
                 <div className="w-full md:w-1/12">
                   <button
                     type="button"
-                    className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded  w-full md:w-auto md:d-flex justify-content-right"
+                    // className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded  w-full md:w-auto md:d-flex justify-content-right"
+                    className="rounded-md bg-red-500 hover:bg-red-700 px-2.5 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 md:w-auto md:d-flex justify-content-right"
                     onClick={() => remove(index)}
                     data-testid={`del-btn-${index}`}
                   >
@@ -720,6 +726,36 @@ const TimesheetFormComponent = () => {
                 </div>
               </div>
             ))}
+
+            {/* Add row, save buttons starts */}
+            {timeslotFields && timeslotFields.length > 0 && (
+              <div className="w-full md:w-1/2  mt-2 md:mt-0">
+                <button
+                  type="button"
+                  // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
+                  className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
+                  onClick={addRow}
+                  disabled={!timesheetDate?.startDate}
+                >
+                  <PlusIcon className="h-4 w-4 hidden md:block" />
+                  <span className="font-normal text-sm">Add entry</span>
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    !timesheetDate?.startDate ||
+                    formValues.timeslots.length == 0 ||
+                    isLoadingSave
+                  }
+                  // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
+                >
+                  {/* <DocumentCheckIcon className="h-4 w-4 hidden md:block" /> */}
+                  <span className="font-normal text-sm">Save</span>
+                </button>
+              </div>
+            )}
+            {/* Add row, save buttons ends */}
           </div>
           {/* Col 2: Summary generated based on inputs */}
           <div className="w-full md:w-2/12">

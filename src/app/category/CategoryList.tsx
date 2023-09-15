@@ -126,7 +126,7 @@ const CategoryList = () => {
         <h1 className="text-xl font-bold">Category List</h1>
         <Link
           href={"/category/add"}
-          className="rounded-md block bg-indigo-600 px-3 py-2 text-md text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="rounded-md block bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Add Category
         </Link>
@@ -171,7 +171,7 @@ const CategoryList = () => {
                     <td className="p-2">{k + 1}</td>
                     <td className="p-2">{cat.name}</td>
                     <td className="p-2">
-                      {cat.subCategories?.map((sub) => sub.name).join(", ")}
+                      {cat.subCategories?.map((sub) => sub.name).join(" | ")}
                     </td>
                     <td className="text-right cat-actions w-7 p-2">
                       <Link href={`/category/${cat._id}`} className="mr-2">
