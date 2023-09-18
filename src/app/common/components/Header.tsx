@@ -24,7 +24,7 @@ export const Header = () => {
       if (
         calDropdown.current &&
         (!calDropdown.current.contains(event.target) ||
-          event.target.className.includes("submenu-link"))
+          event.target?.className?.includes("submenu-link"))
       ) {
         setShowCalMenu(false);
       }

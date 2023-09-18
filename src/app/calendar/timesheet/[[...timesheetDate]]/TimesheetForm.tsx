@@ -5,7 +5,7 @@ import Datepicker, {
   DateType,
   DateValueType,
 } from "react-tailwindcss-datepicker";
-import "../calendar.scss";
+import "../../calendar.scss";
 import {
   DocumentCheckIcon,
   PlusIcon,
@@ -51,7 +51,11 @@ const defaultTimesheetFormData: TimesheetPayload = {
   timeslots: [],
 };
 
-const TimesheetFormComponent = () => {
+const TimesheetFormComponent = ({
+  timesheetDateProp,
+}: {
+  timesheetDateProp: DateType;
+}) => {
   const [timesheetDate, setTimesheetDate] = useState<DateValueType>({
     startDate: null,
     endDate: null,
@@ -141,7 +145,11 @@ const TimesheetFormComponent = () => {
         );
         if (matchingCat) {
           matchingCat.subCategories?.forEach((subCat: SubCategory) => {
-            subCats.push({ value: subCat._id, label: subCat.name });
+            subCats.push({
+              value: subCat._id,
+              label: subCat.name,
+              isProductive: subCat.isProductive,
+            });
           });
         }
         const subcatList = structuredClone(state.subCategoryList);
@@ -196,6 +204,18 @@ const TimesheetFormComponent = () => {
     name: "timeslots",
   });
 
+  /* Based on date prop, populate input (and subsequently load data) */
+  useEffect(() => {
+    if (timesheetDateProp) {
+      console.log("timesheetDateProp:", timesheetDateProp);
+      setTimesheetDate({
+        startDate: timesheetDateProp,
+        endDate: timesheetDateProp,
+      });
+      refetchTimesheetData();
+    }
+  }, [timesheetDateProp]);
+
   /* Every time timesheet API data is fetched, update form to populate data */
   useEffect(() => {
     if (
@@ -232,6 +252,7 @@ const TimesheetFormComponent = () => {
               .map((subCat) => ({
                 value: subCat._id,
                 label: subCat.name,
+                isProductive: subCat.isProductive,
               }))[0],
           };
         }
@@ -707,8 +728,8 @@ const TimesheetFormComponent = () => {
                     {formValues.timeslots &&
                       formValues.timeslots.length > 0 &&
                       calculateTimeDifference(
-                        formValues.timeslots[index].startTime,
-                        formValues.timeslots[index].endTime,
+                        formValues.timeslots[index]?.startTime,
+                        formValues.timeslots[index]?.endTime,
                         true
                       )}
                   </span>
@@ -733,7 +754,7 @@ const TimesheetFormComponent = () => {
                 <button
                   type="button"
                   // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
-                  className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
+                  className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
                   disabled={!timesheetDate?.startDate}
                 >
@@ -759,7 +780,10 @@ const TimesheetFormComponent = () => {
           </div>
           {/* Col 2: Summary generated based on inputs */}
           <div className="w-full md:w-2/12">
-            <TimesheetSummary formValues={formValues} />
+            <TimesheetSummary
+              formValues={formValues}
+              categoryList={dropdownOptions.categoryList}
+            />
           </div>
         </div>
       </form>
