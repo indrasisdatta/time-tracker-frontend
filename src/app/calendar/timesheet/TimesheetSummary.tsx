@@ -2,8 +2,14 @@ import { convertToHrMin, summaryTime } from "@/utils/helper";
 import React, { memo } from "react";
 import { TimesheetPayload } from "@/models/Timesheet";
 
-const TimesheetSummary = ({ formValues }: { formValues: TimesheetPayload }) => {
-  const summaryData: any = summaryTime(formValues);
+const TimesheetSummary = ({
+  formValues,
+  categoryList,
+}: {
+  formValues: TimesheetPayload;
+  categoryList: any;
+}) => {
+  const summaryData: any = summaryTime(formValues, categoryList);
 
   console.log("Timesheet summary", summaryData);
 
@@ -13,12 +19,12 @@ const TimesheetSummary = ({ formValues }: { formValues: TimesheetPayload }) => {
 
   const summaryHtml = () => {
     let html = [];
-    for (let cat in summaryData) {
+    for (let cat in summaryData.details) {
       let subCatTime = [];
-      for (let subCat in summaryData[cat]) {
+      for (let subCat in summaryData.details[cat]) {
         subCatTime.push(
           <li key={subCat}>
-            {subCat}: {convertToHrMin(summaryData[cat][subCat])}
+            {subCat}: {convertToHrMin(summaryData.details[cat][subCat])}
           </li>
         );
       }

@@ -64,8 +64,9 @@ export const convertToHrMin = (timeDiffMinutes, shorthand) => {
  * @param {*} formValues - As per Timesheet form
  * @returns object
  */
-export const summaryTime = (formValues) => {
-  let summary = {};
+export const summaryTime = (formValues, categoryList = []) => {
+  let summary = { totalProductive: 0, details: {} };
+  console.log("Summary time: ", formValues);
   formValues.timeslots.map((form) => {
     /* Required data for summary time calculation */
     if (
@@ -81,14 +82,23 @@ export const summaryTime = (formValues) => {
     const endTime = new Date(`${currDate} ${form.endTime}`);
     const diff = (endTime - startTime) / (60 * 1000);
     /* Create category index if not present */
-    if (!summary.hasOwnProperty(form.category.label)) {
-      summary[form.category.label] = {};
+    if (!summary.details.hasOwnProperty(form.category.label)) {
+      summary.details[form.category.label] = {};
     }
     /* Create subcategory index if not present */
-    if (!summary[form.category.label].hasOwnProperty(form.subCategory.label)) {
-      summary[form.category.label][form.subCategory.label] = 0;
+    if (
+      !summary.details[form.category.label].hasOwnProperty(
+        form.subCategory.label
+      )
+    ) {
+      summary.details[form.category.label][form.subCategory.label] = 0;
     }
-    summary[form.category.label][form.subCategory.label] += diff;
+    summary.details[form.category.label][form.subCategory.label] += diff;
+
+    if (form.subCategory.isProductive) {
+      summary.totalProductive += diff;
+    }
   });
+  // categoryList
   return summary;
 };
