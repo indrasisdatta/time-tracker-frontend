@@ -5,7 +5,7 @@ import Datepicker, {
   DateType,
   DateValueType,
 } from "react-tailwindcss-datepicker";
-import "../calendar.scss";
+import "../../calendar.scss";
 import {
   DocumentCheckIcon,
   PlusIcon,
@@ -51,7 +51,11 @@ const defaultTimesheetFormData: TimesheetPayload = {
   timeslots: [],
 };
 
-const TimesheetFormComponent = () => {
+const TimesheetFormComponent = ({
+  timesheetDateProp,
+}: {
+  timesheetDateProp: DateType;
+}) => {
   const [timesheetDate, setTimesheetDate] = useState<DateValueType>({
     startDate: null,
     endDate: null,
@@ -199,6 +203,18 @@ const TimesheetFormComponent = () => {
     control,
     name: "timeslots",
   });
+
+  /* Based on date prop, populate input (and subsequently load data) */
+  useEffect(() => {
+    if (timesheetDateProp) {
+      console.log("timesheetDateProp:", timesheetDateProp);
+      setTimesheetDate({
+        startDate: timesheetDateProp,
+        endDate: timesheetDateProp,
+      });
+      refetchTimesheetData();
+    }
+  }, [timesheetDateProp]);
 
   /* Every time timesheet API data is fetched, update form to populate data */
   useEffect(() => {
@@ -712,8 +728,8 @@ const TimesheetFormComponent = () => {
                     {formValues.timeslots &&
                       formValues.timeslots.length > 0 &&
                       calculateTimeDifference(
-                        formValues.timeslots[index].startTime,
-                        formValues.timeslots[index].endTime,
+                        formValues.timeslots[index]?.startTime,
+                        formValues.timeslots[index]?.endTime,
                         true
                       )}
                   </span>

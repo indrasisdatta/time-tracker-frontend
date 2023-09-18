@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const TimesheetEntry = () => {
+const TimesheetEntry = ({ params: { timesheetDate } }: { params: any }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -15,7 +15,6 @@ const TimesheetEntry = () => {
       },
     },
   });
-
   const router = useRouter();
 
   return (
@@ -28,7 +27,11 @@ const TimesheetEntry = () => {
           <span className="ml-3">Timesheet Entry</span>
         </h1>
       </div>
-      <TimesheetForm />
+      <TimesheetForm
+        timesheetDateProp={
+          timesheetDate && timesheetDate.length ? timesheetDate[0] : null
+        }
+      />
     </QueryClientProvider>
   );
 };
