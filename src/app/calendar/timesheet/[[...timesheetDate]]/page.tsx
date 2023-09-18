@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import moment from "moment";
 
 const TimesheetEntry = ({ params: { timesheetDate } }: { params: any }) => {
   const queryClient = new QueryClient({
@@ -29,7 +30,9 @@ const TimesheetEntry = ({ params: { timesheetDate } }: { params: any }) => {
       </div>
       <TimesheetForm
         timesheetDateProp={
-          timesheetDate && timesheetDate.length ? timesheetDate[0] : null
+          timesheetDate && timesheetDate.length
+            ? timesheetDate[0]
+            : moment().format("YYYY-MM-DD")
         }
       />
     </QueryClientProvider>
