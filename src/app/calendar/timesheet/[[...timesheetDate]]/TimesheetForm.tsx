@@ -121,7 +121,6 @@ const TimesheetFormComponent = ({
     // enabled: false,
     // manual: true,
   });
-
   /* Reducer to store category and subcategory dropdown values */
   const dropdownOptionsReducer = (
     state: DropdownOptions,

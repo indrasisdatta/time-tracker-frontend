@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const hourStatus = (hrs) => {
   const hrObj = {
     style: {
@@ -101,4 +103,11 @@ export const summaryTime = (formValues) => {
   });
   // categoryList
   return summary;
+};
+
+export const getStartEndDateOfMonth = (date) => {
+  return {
+    startDate: moment(date).startOf("month").format("YYYY-MM-DD"),
+    endDate: moment(date).endOf("month").format("YYYY-MM-DD"),
+  };
 };

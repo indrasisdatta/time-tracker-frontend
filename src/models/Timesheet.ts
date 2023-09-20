@@ -15,3 +15,7 @@ export type TimesheetPayload = {
   timesheetDate: string;
   timeslots: Timeslot[];
 };
+export type CalendarPayload = {
+  startDate: string;
+  endDate: string;
+};
