@@ -26,16 +26,19 @@ const TimesheetSummary = ({
     let html = [];
     for (let cat in summaryData.details) {
       let subCatTime = [];
+      let totalCatTime = 0;
       for (let subCat in summaryData.details[cat]) {
         subCatTime.push(
           <li key={subCat}>
             {subCat}: {convertToHrMin(summaryData.details[cat][subCat])}
           </li>
         );
+        totalCatTime += summaryData.details[cat][subCat];
       }
       html.push(
-        <li key={cat}>
-          {cat} <ul className="list-disc ml-4">{subCatTime}</ul>
+        <li key={cat} className="mb-3">
+          {cat}: {convertToHrMin(totalCatTime)}{" "}
+          <ul className="list-disc ml-4">{subCatTime}</ul>
         </li>
       );
     }
@@ -44,7 +47,7 @@ const TimesheetSummary = ({
 
   return (
     <>
-      <h4 className="text-lg mb-2">Summary</h4>
+      <h4 className="text-xl font-bold mb-2">Report</h4>
       <ul className="list-disc">{summaryHtml()}</ul>
       {!!summaryData.totalProductive && (
         <div

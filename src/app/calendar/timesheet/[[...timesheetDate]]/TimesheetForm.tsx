@@ -386,7 +386,7 @@ const TimesheetFormComponent = ({
       <Toaster />
       {isLoadingSave && <Loader className="m-auto mt-3" />}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="flex">
+        <div className="md:flex">
           {/* Col 1: form inputs */}
           <div className="w-full md:w-10/12">
             {/* Date input and add, submit buttons */}
