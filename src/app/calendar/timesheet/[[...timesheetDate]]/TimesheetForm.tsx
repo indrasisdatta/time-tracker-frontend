@@ -212,6 +212,7 @@ const TimesheetFormComponent = ({
         startDate: timesheetDateProp,
         endDate: timesheetDateProp,
       });
+      setValue(`timesheetDate`, timesheetDateProp.toString());
       refetchTimesheetData();
     }
   }, [timesheetDateProp]);
@@ -301,10 +302,10 @@ const TimesheetFormComponent = ({
         });
         break;
       case "subCategory":
-        // dispatchDropdownOptions({
-        //   type: "SUBCATEGORY_SELECT",
-        //   payload: { subCatId: selectedOption.value },
-        // });
+        setValue(
+          `timeslots.${index}.isProductive`,
+          selectedOption.isProductive
+        );
         break;
     }
   };
@@ -336,6 +337,7 @@ const TimesheetFormComponent = ({
       endTime: "",
       category: "",
       subCategory: "",
+      isProductive: false,
     });
   };
 

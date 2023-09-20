@@ -64,7 +64,7 @@ export const convertToHrMin = (timeDiffMinutes, shorthand) => {
  * @param {*} formValues - As per Timesheet form
  * @returns object
  */
-export const summaryTime = (formValues, categoryList = []) => {
+export const summaryTime = (formValues) => {
   let summary = { totalProductive: 0, details: {} };
   console.log("Summary time: ", formValues);
   formValues.timeslots.map((form) => {

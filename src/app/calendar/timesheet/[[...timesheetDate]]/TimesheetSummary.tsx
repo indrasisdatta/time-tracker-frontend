@@ -9,7 +9,7 @@ const TimesheetSummary = ({
   formValues: TimesheetPayload;
   categoryList: any;
 }) => {
-  const summaryData: any = summaryTime(formValues, categoryList);
+  const summaryData: any = summaryTime(formValues);
 
   console.log("Timesheet summary", summaryData);
 

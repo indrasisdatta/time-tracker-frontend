@@ -8,6 +8,7 @@ export interface Timeslot {
   endTime: string;
   category: string | ReactSelectType;
   subCategory: string | ReactSelectType;
+  isProductive?: boolean;
   comments?: string;
 }
 export type TimesheetPayload = {
