@@ -73,12 +73,21 @@ const TimesheetFormComponent = ({
     isError: isSaveError,
     error: saveError,
   } = useMutation(saveTimesheetApi, {
-    // onSuccess: () => {
-    //   toast.success("Timesheet saved", {
-    //     position: "top-right",
-    //   });
-    //   redirect("/calendar");
-    // },
+    onSuccess: () => {
+      toast.success("Timesheet saved");
+      // redirect("/calendar");
+    },
+    onError: () => {
+      toast.error(
+        `Error: ${(saveError as any).response?.data?.error.join(", ")}`,
+        {
+          duration: 5000,
+          style: {
+            maxWidth: "30em",
+          },
+        }
+      );
+    },
   });
 
   /* Fetch timesheet data based on selected date */
@@ -112,22 +121,6 @@ const TimesheetFormComponent = ({
     // enabled: false,
     // manual: true,
   });
-
-  /* Based on form submit API response, show error toast or redirect */
-  if (isSaveError) {
-    toast.error(
-      `Error: ${(saveError as any).response?.data?.error.join(", ")}`,
-      {
-        duration: 5000,
-        style: {
-          maxWidth: "30em",
-        },
-      }
-    );
-  } else if (savedData) {
-    toast.success("Timesheet saved");
-    // redirect("/calendar");
-  }
 
   /* Reducer to store category and subcategory dropdown values */
   const dropdownOptionsReducer = (
@@ -265,7 +258,10 @@ const TimesheetFormComponent = ({
         timeslots: savedTimeslots,
       });
     } else {
-      reset(defaultTimesheetFormData);
+      reset({
+        ...defaultTimesheetFormData,
+        timesheetDate: timesheetDate?.startDate?.toString(),
+      });
     }
   }, [timesheetData]);
 
@@ -314,6 +310,7 @@ const TimesheetFormComponent = ({
   const handleDateChange = (newValue: DateValueType) => {
     console.log("newValue:", newValue);
     setTimesheetDate(newValue);
+    setValue(`timeslots`, []);
     refetchTimesheetData();
   };
 

@@ -13,7 +13,12 @@ const TimesheetSummary = ({
 
   console.log("Timesheet summary", summaryData);
 
-  if (!summaryData || Object.keys(summaryData).length === 0) {
+  if (
+    !summaryData ||
+    Object.keys(summaryData).length === 0 ||
+    !summaryData.details ||
+    Object.keys(summaryData.details).length === 0
+  ) {
     return null;
   }
 
@@ -41,7 +46,7 @@ const TimesheetSummary = ({
     <>
       <h4 className="text-lg mb-2">Summary</h4>
       <ul className="list-disc">{summaryHtml()}</ul>
-      {summaryData.totalProductive && (
+      {!!summaryData.totalProductive && (
         <div
           className="flex items-center mt-3 md:mt-7 p-2 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800"
           role="alert"
