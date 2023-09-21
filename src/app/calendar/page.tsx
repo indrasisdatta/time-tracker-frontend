@@ -9,6 +9,8 @@ const CalendarPage = () => {
     defaultOptions: {
       queries: {
         refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        retry: false,
       },
     },
   });

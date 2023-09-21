@@ -223,11 +223,13 @@ const TimesheetFormComponent = ({
             endTimeLocal,
             category,
             subCategory,
+            isProductive,
           }: {
             startTimeLocal: Date;
             endTimeLocal: Date;
             category: Category;
             subCategory: string;
+            isProductive: boolean;
           },
           index: number
         ) => {
@@ -247,6 +249,7 @@ const TimesheetFormComponent = ({
                 label: subCat.name,
                 isProductive: subCat.isProductive,
               }))[0],
+            isProductive: !!isProductive,
           };
         }
       );
@@ -352,7 +355,7 @@ const TimesheetFormComponent = ({
   };
 
   const hasError = (field: string) => {
-    console.log("Check hasError", field, errors);
+    // console.log("Check hasError", field, errors);
     if (field.includes("timeslots")) {
       const [fieldName, index, subField] = field.split(".");
       if (
@@ -777,11 +780,13 @@ const TimesheetFormComponent = ({
             {/* Add row, save buttons ends */}
           </div>
           {/* Col 2: Summary generated based on inputs */}
-          <div className="w-full md:w-2/12">
-            <TimesheetSummary
-              formValues={formValues}
-              categoryList={dropdownOptions.categoryList}
-            />
+          <div className="w-full md:w-2/12 summary-container mt-5 md:mt-0">
+            <div className="ml-summary">
+              <TimesheetSummary
+                formValues={formValues}
+                categoryList={dropdownOptions.categoryList}
+              />
+            </div>
           </div>
         </div>
       </form>

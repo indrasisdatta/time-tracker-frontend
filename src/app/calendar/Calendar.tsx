@@ -79,7 +79,9 @@ export const CalendarChild = () => {
     error,
     data: calendarData,
     refetch: refetchCalendarData,
-  } = useQuery(["calendarData", calDate], fetchCalendarData);
+  } = useQuery(["calendarData", calDate], fetchCalendarData, {
+    staleTime: 2 * 60 * 1000, // 2 mins
+  });
 
   console.log("Calendar data: ", calendarData);
   console.log("Current cal date", calDate);
@@ -87,8 +89,24 @@ export const CalendarChild = () => {
 
   /* Every time month is updated, refetch calendar data */
   useEffect(() => {
+    let hasExisting = null;
     if (calDate) {
-      refetchCalendarData();
+      let tempCalEvents = JSON.parse(JSON.stringify(calEvents));
+      if (tempCalEvents && tempCalEvents.length > 0) {
+        const currentStartDate = moment(calDate.startDate).format("YYYY-MM-DD");
+        hasExisting = tempCalEvents.some(
+          (calEvent: any) =>
+            moment(calEvent.start).format("YYYY-MM-DD") === currentStartDate
+        );
+        console.log("tempCalEvents", tempCalEvents);
+        console.log("currentStartDate", currentStartDate);
+        console.log("hasExisting", hasExisting);
+        /* Already fetched data for this month earlier, no need to make API call */
+        if (hasExisting) {
+          return;
+        }
+      }
+      // refetchCalendarData();
     }
   }, [calDate]);
 
@@ -102,7 +120,8 @@ export const CalendarChild = () => {
     let tempCalEvents = JSON.parse(JSON.stringify(calEvents));
     const currentStartDate = moment(calDate.startDate).format("YYYY-MM-DD");
     tempCalEvents = tempCalEvents.filter(
-      (calEvent: any) => calEvent.start !== currentStartDate
+      (calEvent: any) =>
+        moment(calEvent.start).format("YYYY-MM-DD") !== currentStartDate
     );
     if (
       calendarData &&
