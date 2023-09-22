@@ -6,6 +6,10 @@ import { ModalCloseButton } from "./buttons/ModalCloseButton";
 import { QueryKey, useQuery } from "react-query";
 import { calendarSummary } from "@/services/TimesheetService";
 import { convertToHrMin } from "@/utils/helper";
+import {
+  ChevronDoubleRightIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/20/solid";
 
 export const TimeDetailsPopup = ({
   title,
@@ -53,19 +57,29 @@ export const TimeDetailsPopup = ({
 
   console.log("Calendar summary data", summaryData);
 
+  /* Subcategory name based on id */
+  const getSubcatName = (categoryData: Category, subCategoryId: string) => {
+    const subCategory = categoryData.subCategories.find(
+      (subCat: any) => subCat._id === subCategoryId
+    );
+    return subCategory ? subCategory?.name : "";
+  };
+
   /* Summary HTML */
   const showSummaryHtml = () => {
     console.log("Summary html data", summaryData?.data);
     return (
       <div className="text-slate-500 dark:text-white leading-relaxed">
-        <ul>
-          {summaryData?.data?.map((calData) => (
-            <li key={calData._id}>
-              {calData.categoryData} - {calData.subCategory} :{" "}
-              {convertToHrMin(calData.totalTime)}
-            </li>
-          ))}
-        </ul>
+        {summaryData?.data?.map((calData: any) => (
+          <div className="flex justify-between" key={calData._id}>
+            <div>
+              {calData.categoryData?.name}
+              <ChevronDoubleRightIcon className="h-4 w-4" />
+              {getSubcatName(calData.categoryData, calData.subCategory)} :{" "}
+            </div>
+            <div>{convertToHrMin(calData.totalTime)}</div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -101,7 +115,7 @@ export const TimeDetailsPopup = ({
                 <div className="flex items-center justify-end py-3 px-1 border-t border-solid border-slate-200 rounded-b">
                   <SecondaryButton
                     type="button"
-                    text="Cancel"
+                    text="Close"
                     onClick={onCloseModal}
                   />
                 </div>

@@ -84,13 +84,13 @@ export const CalendarChild = () => {
     isLoading,
     isError,
     error,
-    data: calendarData,
+    data: calendarApiData,
     refetch: refetchCalendarData,
-  } = useQuery(["calendarData", calDate], fetchCalendarData, {
+  } = useQuery(["calendarApiData", calDate], fetchCalendarData, {
     staleTime: 5 * 60 * 1000, // 5 mins
   });
 
-  console.log("Calendar data: ", calendarData);
+  console.log("Calendar data: ", calendarApiData);
   console.log("Current cal date", calDate);
   console.log("Calendar events", calEvents);
 
@@ -117,26 +117,22 @@ export const CalendarChild = () => {
     }
   }, [calDate]);
 
+  /* When calendar date is clicked, open timesheet for this date */
   useEffect(() => {
     if (tsDate) {
       redirect(`/calendar/timesheet/${tsDate}`);
     }
   }, [tsDate]);
 
+  /* When calendar API data is fetched, update calendar events for that month */
   useEffect(() => {
-    let tempCalEvents = JSON.parse(JSON.stringify(calEvents));
-    const currentStartDate = moment(calDate.startDate).format("YYYY-MM-DD");
-    tempCalEvents = tempCalEvents.filter(
-      (calEvent: any) =>
-        moment(calEvent.start).format("YYYY-MM-DD") !== currentStartDate
-    );
-    console.log("tempCalEvents", tempCalEvents);
+    const tempCalEvents: any = [];
     if (
-      calendarData &&
-      calendarData.status === 1 &&
-      calendarData.data?.length > 0
+      calendarApiData &&
+      calendarApiData.status === 1 &&
+      calendarApiData.data?.length > 0
     ) {
-      calendarData.data.map((cal: any) => {
+      calendarApiData.data.map((cal: any) => {
         (tempCalEvents as any).push({
           start: moment(cal.timesheetDate),
           end: moment(cal.timesheetDate),
@@ -146,7 +142,7 @@ export const CalendarChild = () => {
       });
     }
     setCalEvents(tempCalEvents);
-  }, [calendarData]);
+  }, [calendarApiData]);
 
   /* Date select + Prev, next, current button actions */
   const onNavigate = (newDate: Date, view: View, action: NavigateAction) => {
