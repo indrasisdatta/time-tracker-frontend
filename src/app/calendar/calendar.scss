@@ -16,7 +16,11 @@
 }
 .dark {
   .rbc-toolbar button {
-    border: 1px solid var(--color-light);
+    border: 1px solid rgb(245 245 244);
+    color: rgb(245 245 244);
+  }
+  .rbc-off-range-bg {
+    background: #414448cf;
   }
 }
 .light {
@@ -46,6 +50,9 @@ svg.md\:block {
   .opt-div {
     background-color: rgb(31 41 55);
   }
+  .rbc-today {
+    background-color: rgb(29 78 216);
+  }
 }
 .timeslot-row {
   .react-time-picker {
@@ -58,11 +65,27 @@ svg.md\:block {
       font-size: 0.9rem;
     }
   }
-
   .select-text > div > p {
     font-size: 0.875rem;
   }
   .opt-div > div {
     padding: 0;
+  }
+}
+.rbc-button-link {
+  font-size: 1.3em;
+}
+@media (min-width: 768px) {
+  .summary-container {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    right: 0;
+  }
+  .ml-summary {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
   }
 }

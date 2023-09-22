@@ -73,12 +73,21 @@ const TimesheetFormComponent = ({
     isError: isSaveError,
     error: saveError,
   } = useMutation(saveTimesheetApi, {
-    // onSuccess: () => {
-    //   toast.success("Timesheet saved", {
-    //     position: "top-right",
-    //   });
-    //   redirect("/calendar");
-    // },
+    onSuccess: () => {
+      toast.success("Timesheet saved");
+      // redirect("/calendar");
+    },
+    onError: () => {
+      toast.error(
+        `Error: ${(saveError as any).response?.data?.error.join(", ")}`,
+        {
+          duration: 5000,
+          style: {
+            maxWidth: "30em",
+          },
+        }
+      );
+    },
   });
 
   /* Fetch timesheet data based on selected date */
@@ -112,23 +121,6 @@ const TimesheetFormComponent = ({
     // enabled: false,
     // manual: true,
   });
-
-  /* Based on form submit API response, show error toast or redirect */
-  if (isSaveError) {
-    toast.error(
-      `Error: ${(saveError as any).response?.data?.error.join(", ")}`,
-      {
-        duration: 5000,
-        style: {
-          maxWidth: "30em",
-        },
-      }
-    );
-  } else if (savedData) {
-    toast.success("Timesheet saved");
-    // redirect("/calendar");
-  }
-
   /* Reducer to store category and subcategory dropdown values */
   const dropdownOptionsReducer = (
     state: DropdownOptions,
@@ -212,6 +204,7 @@ const TimesheetFormComponent = ({
         startDate: timesheetDateProp,
         endDate: timesheetDateProp,
       });
+      setValue(`timesheetDate`, timesheetDateProp.toString());
       refetchTimesheetData();
     }
   }, [timesheetDateProp]);
@@ -230,11 +223,13 @@ const TimesheetFormComponent = ({
             endTimeLocal,
             category,
             subCategory,
+            isProductive,
           }: {
             startTimeLocal: Date;
             endTimeLocal: Date;
             category: Category;
             subCategory: string;
+            isProductive: boolean;
           },
           index: number
         ) => {
@@ -254,6 +249,7 @@ const TimesheetFormComponent = ({
                 label: subCat.name,
                 isProductive: subCat.isProductive,
               }))[0],
+            isProductive: !!isProductive,
           };
         }
       );
@@ -264,7 +260,10 @@ const TimesheetFormComponent = ({
         timeslots: savedTimeslots,
       });
     } else {
-      reset(defaultTimesheetFormData);
+      reset({
+        ...defaultTimesheetFormData,
+        timesheetDate: timesheetDate?.startDate?.toString(),
+      });
     }
   }, [timesheetData]);
 
@@ -301,10 +300,10 @@ const TimesheetFormComponent = ({
         });
         break;
       case "subCategory":
-        // dispatchDropdownOptions({
-        //   type: "SUBCATEGORY_SELECT",
-        //   payload: { subCatId: selectedOption.value },
-        // });
+        setValue(
+          `timeslots.${index}.isProductive`,
+          selectedOption.isProductive
+        );
         break;
     }
   };
@@ -313,6 +312,7 @@ const TimesheetFormComponent = ({
   const handleDateChange = (newValue: DateValueType) => {
     console.log("newValue:", newValue);
     setTimesheetDate(newValue);
+    setValue(`timeslots`, []);
     refetchTimesheetData();
   };
 
@@ -336,6 +336,7 @@ const TimesheetFormComponent = ({
       endTime: "",
       category: "",
       subCategory: "",
+      isProductive: false,
     });
   };
 
@@ -354,7 +355,7 @@ const TimesheetFormComponent = ({
   };
 
   const hasError = (field: string) => {
-    console.log("Check hasError", field, errors);
+    // console.log("Check hasError", field, errors);
     if (field.includes("timeslots")) {
       const [fieldName, index, subField] = field.split(".");
       if (
@@ -388,7 +389,7 @@ const TimesheetFormComponent = ({
       <Toaster />
       {isLoadingSave && <Loader className="m-auto mt-3" />}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="flex">
+        <div className="md:flex">
           {/* Col 1: form inputs */}
           <div className="w-full md:w-10/12">
             {/* Date input and add, submit buttons */}
@@ -779,11 +780,13 @@ const TimesheetFormComponent = ({
             {/* Add row, save buttons ends */}
           </div>
           {/* Col 2: Summary generated based on inputs */}
-          <div className="w-full md:w-2/12">
-            <TimesheetSummary
-              formValues={formValues}
-              categoryList={dropdownOptions.categoryList}
-            />
+          <div className="w-full md:w-2/12 summary-container mt-5 md:mt-0">
+            <div className="ml-summary">
+              <TimesheetSummary
+                formValues={formValues}
+                categoryList={dropdownOptions.categoryList}
+              />
+            </div>
           </div>
         </div>
       </form>

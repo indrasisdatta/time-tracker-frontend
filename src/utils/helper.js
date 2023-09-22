@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const hourStatus = (hrs) => {
   const hrObj = {
     style: {
@@ -64,7 +66,7 @@ export const convertToHrMin = (timeDiffMinutes, shorthand) => {
  * @param {*} formValues - As per Timesheet form
  * @returns object
  */
-export const summaryTime = (formValues, categoryList = []) => {
+export const summaryTime = (formValues) => {
   let summary = { totalProductive: 0, details: {} };
   console.log("Summary time: ", formValues);
   formValues.timeslots.map((form) => {
@@ -101,4 +103,11 @@ export const summaryTime = (formValues, categoryList = []) => {
   });
   // categoryList
   return summary;
+};
+
+export const getStartEndDateOfMonth = (date) => {
+  return {
+    startDate: moment(date).startOf("month").format("YYYY-MM-DD"),
+    endDate: moment(date).endOf("month").format("YYYY-MM-DD"),
+  };
 };

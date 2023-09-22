@@ -9,11 +9,16 @@ const TimesheetSummary = ({
   formValues: TimesheetPayload;
   categoryList: any;
 }) => {
-  const summaryData: any = summaryTime(formValues, categoryList);
+  const summaryData: any = summaryTime(formValues);
 
   console.log("Timesheet summary", summaryData);
 
-  if (!summaryData || Object.keys(summaryData).length === 0) {
+  if (
+    !summaryData ||
+    Object.keys(summaryData).length === 0 ||
+    !summaryData.details ||
+    Object.keys(summaryData.details).length === 0
+  ) {
     return null;
   }
 
@@ -21,16 +26,19 @@ const TimesheetSummary = ({
     let html = [];
     for (let cat in summaryData.details) {
       let subCatTime = [];
+      let totalCatTime = 0;
       for (let subCat in summaryData.details[cat]) {
         subCatTime.push(
           <li key={subCat}>
             {subCat}: {convertToHrMin(summaryData.details[cat][subCat])}
           </li>
         );
+        totalCatTime += summaryData.details[cat][subCat];
       }
       html.push(
-        <li key={cat}>
-          {cat} <ul className="list-disc ml-4">{subCatTime}</ul>
+        <li key={cat} className="mb-3">
+          {cat}: {convertToHrMin(totalCatTime)}{" "}
+          <ul className="list-disc ml-4">{subCatTime}</ul>
         </li>
       );
     }
@@ -39,9 +47,9 @@ const TimesheetSummary = ({
 
   return (
     <>
-      <h4 className="text-lg mb-2">Summary</h4>
+      <h4 className="text-xl font-bold mb-2">Report</h4>
       <ul className="list-disc">{summaryHtml()}</ul>
-      {summaryData.totalProductive && (
+      {!!summaryData.totalProductive && (
         <div
           className="flex items-center mt-3 md:mt-7 p-2 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800"
           role="alert"

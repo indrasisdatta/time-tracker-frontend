@@ -8,9 +8,14 @@ export interface Timeslot {
   endTime: string;
   category: string | ReactSelectType;
   subCategory: string | ReactSelectType;
+  isProductive?: boolean;
   comments?: string;
 }
 export type TimesheetPayload = {
   timesheetDate: string;
   timeslots: Timeslot[];
+};
+export type CalendarPayload = {
+  startDate: string;
+  endDate: string;
 };

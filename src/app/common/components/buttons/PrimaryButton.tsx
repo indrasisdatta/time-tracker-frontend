@@ -2,15 +2,17 @@ import React from "react";
 
 export const PrimaryButton = ({
   text,
+  type,
   onClick,
 }: {
   text: string;
+  type: any;
   onClick: any;
 }) => {
   return (
     <button
-      type="button"
-      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      type={type}
+      className="rounded-md bg-indigo-600 px-3 py-2 mr-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
       onClick={onClick}
     >
       {text}
