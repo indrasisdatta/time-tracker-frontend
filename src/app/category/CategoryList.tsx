@@ -114,9 +114,9 @@ const CategoryList = () => {
     <div className="container mx-auto">
       <Toaster />
       <Prompt
-        title={"Delete category?"}
+        title={"Delete category"}
         message={`Are you sure you want to delete this category?`}
-        category={selectedCat}
+        // category={selectedCat}
         setShowModal={setShowModal}
         showModal={showModal}
         onSubmitModal={onSubmitModalCallback}

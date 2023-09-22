@@ -17,8 +17,9 @@ import {
 import "./calendar.scss";
 import { calendarMonthlyTime } from "@/services/TimesheetService";
 import { QueryKey, useQuery } from "react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { redirect } from "next/navigation";
+import { TimeDetailsPopup } from "../common/components/TimeDetailsPopup";
 
 interface CustomEvent extends Event {
   value: string | number;
@@ -52,6 +53,12 @@ export const CalendarChild = () => {
   /* Selected date - open timesheet for this date */
   const [tsDate, setTsDate] = useState("");
 
+  /* Calendar details modal */
+  const [showModal, setShowModal] = useState(false);
+
+  /* Calendar details date selected */
+  const [calSelectedDate, setCalSelectedDate] = useState("");
+
   const fetchCalendarData = async ({
     queryKey,
   }: {
@@ -80,7 +87,7 @@ export const CalendarChild = () => {
     data: calendarData,
     refetch: refetchCalendarData,
   } = useQuery(["calendarData", calDate], fetchCalendarData, {
-    staleTime: 2 * 60 * 1000, // 2 mins
+    staleTime: 5 * 60 * 1000, // 5 mins
   });
 
   console.log("Calendar data: ", calendarData);
@@ -123,6 +130,7 @@ export const CalendarChild = () => {
       (calEvent: any) =>
         moment(calEvent.start).format("YYYY-MM-DD") !== currentStartDate
     );
+    console.log("tempCalEvents", tempCalEvents);
     if (
       calendarData &&
       calendarData.status === 1 &&
@@ -154,8 +162,28 @@ export const CalendarChild = () => {
     }
   };
 
+  /* Calendar date selected - show popup with details */
+  const onSelectEvent = (event: CustomEvent) => {
+    const selectedDate = moment(event.start).format("YYYY-MM-DD");
+    console.log("Selected date", selectedDate);
+    setCalSelectedDate(selectedDate);
+    setShowModal(true);
+  };
+
+  /* Close button click handler */
+  const closeClickHandler = useCallback(() => {
+    setShowModal(false);
+  }, [showModal]);
+
   return (
     <div>
+      <TimeDetailsPopup
+        title={`Summary: ${moment(calSelectedDate).format("DD MMM YYYY")}`}
+        message={`Calendar details`}
+        showModal={showModal}
+        onCloseModal={closeClickHandler}
+        selectedDate={calSelectedDate}
+      />
       <Calendar
         localizer={localizer}
         startAccessor="start"
@@ -166,6 +194,7 @@ export const CalendarChild = () => {
         eventPropGetter={eventPropGetter}
         messages={{ previous: "Prev", next: "Next", today: "Current" }}
         onNavigate={onNavigate}
+        onSelectEvent={onSelectEvent}
       />
     </div>
   );
