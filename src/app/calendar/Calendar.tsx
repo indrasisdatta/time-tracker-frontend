@@ -226,7 +226,10 @@ export const CalendarChild = () => {
             <li key={weekData._id}>
               {moment(weekData.week?.start).format("DD MMM")} -{" "}
               {moment(weekData.week?.end).format("D MMM")}:{" "}
-              {convertToHrMin(weekData.totalProductive, true)}
+              {convertToHrMin(
+                Math.round(weekData.totalProductiveMins / weekData.workingDays),
+                true
+              )}
             </li>
           ))}
         </ul>
