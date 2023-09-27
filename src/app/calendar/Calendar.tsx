@@ -11,15 +11,20 @@ import {
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
   convertToHrMin,
+  getMonthName,
   getStartEndDateOfMonth,
   hourStatus,
 } from "@/utils/helper";
 import "./calendar.scss";
-import { calendarMonthlyTime } from "@/services/TimesheetService";
+import {
+  calendarMonthlyTime,
+  weeklytimeList,
+} from "@/services/TimesheetService";
 import { QueryKey, useQuery } from "react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { redirect } from "next/navigation";
 import { TimeDetailsPopup } from "../common/components/TimeDetailsPopup";
+import { Loader } from "../common/components/Loader";
 
 interface CustomEvent extends Event {
   value: string | number;
@@ -38,7 +43,7 @@ const eventPropGetter: EventPropGetter<CustomEvent> = (event) => {
   const hrs = Number(event.value) / 60;
   const { style } = hourStatus(hrs);
   return {
-    className: `!text-center !m-auto md:!w-2/5`,
+    className: `!text-center !m-auto md:!w-3/5`,
     style,
   };
 };
@@ -64,7 +69,7 @@ export const CalendarChild = () => {
   }: {
     queryKey: QueryKey;
   }): Promise<any> => {
-    console.log("Query key", queryKey);
+    console.log("Calendar API Query key", queryKey);
     if (
       queryKey[1] &&
       queryKey[1].hasOwnProperty("startDate") &&
@@ -80,19 +85,43 @@ export const CalendarChild = () => {
     }
   };
 
+  const fetchWeeklyTimes = async ({
+    queryKey,
+  }: {
+    queryKey: QueryKey;
+  }): Promise<any> => {
+    console.log("Weekly API Query key", queryKey);
+    if (queryKey[1] && queryKey[1].hasOwnProperty("startDate")) {
+      let dateStr = (queryKey[1] as any).startDate;
+      dateStr = dateStr.split("-", 2).join("-");
+      const { data } = await weeklytimeList(dateStr);
+      return data;
+    }
+  };
+
   const {
-    isLoading,
-    isError,
-    error,
+    isLoading: isLoadingCal,
+    isError: isErrorCal,
+    error: errorCal,
     data: calendarApiData,
-    refetch: refetchCalendarData,
+    // refetch: refetchCalendarData,
   } = useQuery(["calendarApiData", calDate], fetchCalendarData, {
+    staleTime: 5 * 60 * 1000, // 5 mins
+  });
+
+  const {
+    isLoading: isLoadingWeek,
+    isError: isErrorWeek,
+    error: errorWeek,
+    data: weeklyApiData,
+  } = useQuery(["weeklyApi", calDate], fetchWeeklyTimes, {
     staleTime: 5 * 60 * 1000, // 5 mins
   });
 
   console.log("Calendar data: ", calendarApiData);
   console.log("Current cal date", calDate);
   console.log("Calendar events", calEvents);
+  console.log("Weekly data:", weeklyApiData);
 
   /* Every time month is updated, refetch calendar data */
   useEffect(() => {
@@ -171,8 +200,42 @@ export const CalendarChild = () => {
     setShowModal(false);
   }, [showModal]);
 
+  const weeklyHtml = () => {
+    if (isLoadingWeek) {
+      return <Loader className="m-auto my-8 flex" />;
+    }
+    if (isErrorWeek) {
+      return (
+        <div className="mt-3">
+          {(errorWeek as Error)?.message
+            ? (errorWeek as Error).message
+            : "Something went wrong. Please try again later."}
+        </div>
+      );
+    }
+    if (
+      weeklyApiData &&
+      (!weeklyApiData.data || weeklyApiData.data?.length === 0)
+    ) {
+      return <div className="mt-3">No records found</div>;
+    }
+    if (weeklyApiData && weeklyApiData.data && weeklyApiData.data?.length > 0) {
+      return (
+        <ul className="mt-3">
+          {weeklyApiData.data?.map((weekData: any) => (
+            <li key={weekData._id}>
+              {moment(weekData.week?.start).format("DD MMM")} -{" "}
+              {moment(weekData.week?.end).format("D MMM")}:{" "}
+              {convertToHrMin(weekData.totalProductive, true)}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+  };
+
   return (
-    <div>
+    <div className="md:flex">
       <TimeDetailsPopup
         title={`Summary: ${moment(calSelectedDate).format("DD MMM YYYY")}`}
         message={`Calendar details`}
@@ -180,18 +243,41 @@ export const CalendarChild = () => {
         onCloseModal={closeClickHandler}
         selectedDate={calSelectedDate}
       />
-      <Calendar
-        localizer={localizer}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500 }}
-        events={calEvents}
-        views={["month"]}
-        eventPropGetter={eventPropGetter}
-        messages={{ previous: "Prev", next: "Next", today: "Current" }}
-        onNavigate={onNavigate}
-        onSelectEvent={onSelectEvent}
-      />
+      <div className="w-full md:w-9/12">
+        {isLoadingCal && (
+          <div className="m-auto my-8 text-center">
+            <Loader className="" />{" "}
+            <p className="mb-6">Loading data for {getMonthName(calDate)}</p>
+          </div>
+        )}
+        {isErrorCal && (
+          <div className="m-auto my-3 text-center">
+            <p className="mb-3">
+              {(errorCal as Error)?.message
+                ? (errorCal as Error).message
+                : "Something went wrong. Please try again later."}
+            </p>
+          </div>
+        )}
+        <Calendar
+          localizer={localizer}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 500 }}
+          events={calEvents}
+          views={["month"]}
+          eventPropGetter={eventPropGetter}
+          messages={{ previous: "Prev", next: "Next", today: "Current" }}
+          onNavigate={onNavigate}
+          onSelectEvent={onSelectEvent}
+        />
+      </div>
+      <div className="w-full md:w-3/12 mx-4 my-1">
+        <div className="max-w-sm px-4 py-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <h5 className="text-xl">Weekly time spent</h5>
+          {weeklyHtml()}
+        </div>
+      </div>
     </div>
   );
 };

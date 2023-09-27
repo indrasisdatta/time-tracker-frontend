@@ -20,3 +20,8 @@ export const calendarMonthlyTime = async (data: CalendarPayload) => {
 export const calendarSummary = async (data: CalendarPayload) => {
   return await axios.post("timesheet/summary", data);
 };
+
+/* Show popup summary for a date */
+export const weeklytimeList = async (yearMonth: string) => {
+  return await axios.get(`timesheet/weekly_time/${yearMonth}`);
+};
