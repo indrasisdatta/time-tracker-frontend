@@ -6,6 +6,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import { isServer } from "@/utils/helper";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,11 +31,11 @@ export const Header = () => {
         setShowCalMenu(false);
       }
     }
-    if (typeof window !== "undefined") {
+    if (!isServer()) {
       window.addEventListener("click", handleClick);
     }
     return () => {
-      if (typeof window !== "undefined") {
+      if (!isServer()) {
         window.removeEventListener("click", handleClick);
       }
     };

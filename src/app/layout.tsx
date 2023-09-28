@@ -5,6 +5,10 @@ import { Inter } from "next/font/google";
 import { Header } from "./common/components/Header";
 // import { ThemeProvider } from "next-themes";
 import { ThemeWrapper } from "./ThemeWrapper";
+// import { NextProgressBar } from "./common/components/NextProgressBar";
+import { Suspense } from "react";
+import { Loader } from "./common/components/Loader";
+import { PageLoader } from "./common/components/PageLoader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +27,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeWrapper>
           <Header />
-          <div className="container mx-auto p-8">{children}</div>
+          <Suspense fallback={<PageLoader />}>
+            <div className="container mx-auto p-8">{children}</div>
+          </Suspense>
         </ThemeWrapper>
       </body>
     </html>

@@ -15,6 +15,7 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { useSearchParams } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import Prompt from "../common/components/Prompt";
+import { isServer } from "@/utils/helper";
 
 const CategoryList = () => {
   // const pathname = usePathname();
@@ -66,7 +67,7 @@ const CategoryList = () => {
       param[0] === "op" &&
       param[1] === "add" &&
       (!toastMsgRef || !toastMsgRef.current) &&
-      typeof window !== undefined
+      !isServer()
     ) {
       toastMsgRef.current = true;
       console.log("Toast message for add");
@@ -77,7 +78,7 @@ const CategoryList = () => {
       param[0] === "op" &&
       param[1] === "update" &&
       (!toastMsgRef || !toastMsgRef.current) &&
-      typeof window !== undefined
+      !isServer()
     ) {
       toastMsgRef.current = true;
       console.log("Toast message for update");

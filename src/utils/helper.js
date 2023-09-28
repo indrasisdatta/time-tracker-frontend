@@ -115,3 +115,8 @@ export const getStartEndDateOfMonth = (date) => {
 export const getMonthName = (calDate) => {
   return moment(calDate.startDate).format("MMMM YYYY");
 };
+
+/* Check if it's rendered from server */
+export const isServer = () => {
+  return typeof window === "undefined";
+};
