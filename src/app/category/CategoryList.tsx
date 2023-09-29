@@ -61,32 +61,37 @@ const CategoryList = () => {
   const onCloseModalCallback = useCallback(onCloseModal, []);
 
   /* Show success message for category add, edit */
-  for (let param of searchParams) {
-    // console.log("Param", param);
-    if (
-      param[0] === "op" &&
-      param[1] === "add" &&
-      (!toastMsgRef || !toastMsgRef.current) &&
-      !isServer()
-    ) {
-      toastMsgRef.current = true;
-      console.log("Toast message for add");
-      // setTimeout(() => {
-      // toast.success("Category added successfully");
-      // }, 3000);
-    } else if (
-      param[0] === "op" &&
-      param[1] === "update" &&
-      (!toastMsgRef || !toastMsgRef.current) &&
-      !isServer()
-    ) {
-      toastMsgRef.current = true;
-      console.log("Toast message for update");
-      // setTimeout(() => {
-      // toast.success("Category updated successfully");
-      // }, 3000);
+
+  useEffect(() => {
+    console.log("Search params", searchParams);
+    for (let param of searchParams) {
+      // console.log("Param", param);
+      if (
+        param[0] === "op" &&
+        param[1] === "add" &&
+        (!toastMsgRef || !toastMsgRef.current) &&
+        !isServer()
+      ) {
+        toastMsgRef.current = true;
+        console.log("Toast message for add");
+        // setTimeout(() => {
+        toast.success("Category added successfully");
+        // }, 3000);
+      } else if (
+        param[0] === "op" &&
+        param[1] === "update" &&
+        (!toastMsgRef || !toastMsgRef.current) &&
+        !isServer()
+      ) {
+        toastMsgRef.current = true;
+        console.log("Toast message for update");
+        // setTimeout(() => {
+        toast.success("Category updated successfully");
+        // }, 3000);
+      }
     }
-  }
+  }, []);
+
   /* API call */
   const fetchCategories = async () => {
     const { data } = await getCategories();
