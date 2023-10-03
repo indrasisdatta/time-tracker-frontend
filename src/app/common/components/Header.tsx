@@ -136,6 +136,14 @@ export const Header = () => {
                   </ul>
                 </div>
               </div>
+              <Link
+                href="/reports"
+                className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                  "/reports"
+                )}`}
+              >
+                Reports
+              </Link>
             </div>
             <div className="mt-3 md:mt-0 text-center lg:inline-flex items-center">
               <ThemeSwitch />
