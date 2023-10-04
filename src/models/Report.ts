@@ -12,3 +12,9 @@ export type ReportSearchPayload = {
   startDate: string;
   endDate: string;
 };
+
+export type ReportGrid = {
+  category: string;
+  subCategory: string;
+  totalTime: number;
+};

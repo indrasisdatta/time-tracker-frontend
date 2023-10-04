@@ -265,7 +265,7 @@ export const ReportSearch = () => {
                   /* hasError("timesheetDate")
                           ? "ring-red-600"
                           : "ring-gray-300" */
-                  inputClassName="w-full flex-1 border-0 bg-transparent py-[0.41rem] pl-1 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md  focus-visible:outline-none"
+                  inputClassName="w-full flex-1 border-0 bg-transparent py-[0.41rem] pl-2.5 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md  focus-visible:outline-none"
                   containerClassName={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ring-gray-300`}
                   toggleClassName="mr-2 mb-1"
                 />
