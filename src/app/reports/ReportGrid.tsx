@@ -7,7 +7,10 @@ import {
   useReactTable,
   getCoreRowModel,
   createColumnHelper,
+  getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table";
+import { ReportGraph } from "./ReportGraph";
 
 export const ReportGrid = () => {
   const columnHelper = createColumnHelper<Report>();
@@ -55,9 +58,12 @@ export const ReportGrid = () => {
         <ReportSearch />
       </div>
       <div className="mt-4 flex flex-col">
-        <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
-          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+        <div className="w-full md:flex">
+          <div className="py-2 md:w-1/2">
             <Table columns={columns} data={data} />
+          </div>
+          <div className="py-2 md:w-1/2">
+            <ReportGraph />
           </div>
         </div>
       </div>
