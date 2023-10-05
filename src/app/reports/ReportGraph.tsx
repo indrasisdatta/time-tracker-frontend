@@ -39,9 +39,10 @@ export const ReportGraph = () => {
     labels,
     datasets: [
       {
-        label: "Report",
+        label: "Total time spent",
         data: [7.5, 8, 6, null, null],
         backgroundColor: "rgba(53, 162, 235, 0.5)",
+        borderWidth: 1,
       },
     ],
   };

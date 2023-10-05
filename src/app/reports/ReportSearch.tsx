@@ -28,7 +28,15 @@ const defaultFormValues = {
   dateRange: { startDate: "", endDate: "" },
 };
 
-export const ReportSearch = () => {
+export const ReportSearch = ({
+  reportSearchPayload,
+  setReportSearchPayload,
+}: {
+  reportSearchPayload: ReportSearchFormValues;
+  setReportSearchPayload: React.Dispatch<
+    React.SetStateAction<ReportSearchFormValues>
+  >;
+}) => {
   /* Reducer to store category and subcategory dropdown values */
   const dropdownOptionsReducer = (
     state: DropdownOptions,
@@ -64,7 +72,10 @@ export const ReportSearch = () => {
     dropdownOptionsReducer,
     defaultDropdownOptions
   );
-  const [dateRangeInput, setDateRangeInput] = useState({
+  const [dateRangeInput, setDateRangeInput] = useState<{
+    startDate: null | string;
+    endDate: null | string;
+  }>({
     startDate: null,
     endDate: null,
   });
@@ -82,6 +93,7 @@ export const ReportSearch = () => {
     isError: isErrorCat,
   } = useQuery("categoryList", fetchCategories, {
     refetchOnWindowFocus: false,
+    staleTime: 15 * 60 * 1000, // 15 mins
   });
 
   const {
@@ -92,7 +104,8 @@ export const ReportSearch = () => {
     setValue,
     reset,
   } = useForm<ReportSearchFormValues>({
-    defaultValues: defaultFormValues,
+    // defaultValues: defaultFormValues,
+    defaultValues: reportSearchPayload,
   });
 
   const onSubmit = (formData: ReportSearchFormValues) => {
@@ -103,6 +116,13 @@ export const ReportSearch = () => {
     reset(defaultFormValues);
     setDateRangeInput({ startDate: null, endDate: null });
   };
+
+  /* On initial load, populate datepicker with props value */
+  useEffect(() => {
+    if (reportSearchPayload && reportSearchPayload?.dateRange) {
+      setDateRangeInput(reportSearchPayload?.dateRange);
+    }
+  }, []);
 
   /* Update reducer once category API response is obtained */
   useEffect(() => {

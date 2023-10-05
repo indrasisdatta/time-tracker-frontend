@@ -1,8 +1,6 @@
-import { Category, SubCategory } from "./Category";
-
 export type ReportSearchFormValues = {
-  category: string | Category;
-  subCategory: string | SubCategory;
+  category: string | { label: string; value: string };
+  subCategory: string | { label: string; value: string };
   dateRange: { startDate: string | null; endDate: string | null };
 };
 
@@ -17,4 +15,10 @@ export type ReportGrid = {
   category: string;
   subCategory: string;
   totalTime: number;
+};
+export type ReportPayload = {
+  category: string | null;
+  subCategory: string | null;
+  startDate: string | null;
+  endDate: string | null;
 };

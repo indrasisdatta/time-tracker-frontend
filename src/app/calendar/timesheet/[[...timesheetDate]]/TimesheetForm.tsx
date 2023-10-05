@@ -23,7 +23,11 @@ import {
   useQuery,
 } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
-import { TimesheetPayload, Timeslot } from "@/models/Timesheet";
+import {
+  ReactSelectType,
+  TimesheetPayload,
+  Timeslot,
+} from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { calculateTimeDifference, summaryTime } from "@/utils/helper";
@@ -348,7 +352,9 @@ const TimesheetFormComponent = ({
       row.category =
         typeof row.category === "object" ? row.category?.value : "";
       row.subCategory =
-        typeof row.subCategory === "object" ? row.subCategory?.value : "";
+        typeof row.subCategory === "object"
+          ? (row.subCategory as ReactSelectType)?.value
+          : "";
       // row.comments = null;
     });
     console.log("Payload: ", payload);

@@ -1,15 +1,15 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ReportGrid } from "./ReportGrid";
+import { Report } from "./Report";
 
 const queryClient = new QueryClient();
 
-const Report = () => {
+const ReportPage = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReportGrid />
+      <Report />
     </QueryClientProvider>
   );
 };
 
-export default Report;
+export default ReportPage;
