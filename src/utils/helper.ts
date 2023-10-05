@@ -1,6 +1,12 @@
+import { Category, SubCategory } from "@/models/Category";
+import {
+  ReactSelectType,
+  TimesheetPayload,
+  Timeslot,
+} from "@/models/Timesheet";
 import moment from "moment";
 
-export const hourStatus = (hrs) => {
+export const hourStatus = (hrs: number) => {
   const hrObj = {
     style: {
       backgroundColor: "var(--color-red)",
@@ -22,8 +28,8 @@ export const hourStatus = (hrs) => {
 };
 
 export const calculateTimeDifference = (
-  startTime,
-  endTime,
+  startTime: string,
+  endTime: string,
   shorthand = false
 ) => {
   console.log("Check start end time", startTime, endTime);
@@ -43,7 +49,10 @@ export const calculateTimeDifference = (
   return convertToHrMin(timeDiffMinutes, shorthand);
 };
 
-export const convertToHrMin = (timeDiffMinutes, shorthand) => {
+export const convertToHrMin = (
+  timeDiffMinutes: number,
+  shorthand: boolean = false
+) => {
   // Calculate hours and minutes
   const hours = Math.floor(timeDiffMinutes / 60);
   const minutes = timeDiffMinutes % 60;
@@ -66,10 +75,10 @@ export const convertToHrMin = (timeDiffMinutes, shorthand) => {
  * @param {*} formValues - As per Timesheet form
  * @returns object
  */
-export const summaryTime = (formValues) => {
-  let summary = { totalProductive: 0, details: {} };
+export const summaryTime = (formValues: TimesheetPayload) => {
+  let summary: any = { totalProductive: 0, details: {} };
   console.log("Summary time: ", formValues);
-  formValues.timeslots.map((form) => {
+  formValues.timeslots.map((form: Timeslot) => {
     /* Required data for summary time calculation */
     if (
       !form.startTime ||
@@ -80,24 +89,28 @@ export const summaryTime = (formValues) => {
       return;
     }
     let currDate = formValues.timesheetDate;
-    const startTime = new Date(`${currDate} ${form.startTime}`);
-    const endTime = new Date(`${currDate} ${form.endTime}`);
+    const startTime: any = new Date(`${currDate} ${form.startTime}`);
+    const endTime: any = new Date(`${currDate} ${form.endTime}`);
     const diff = (endTime - startTime) / (60 * 1000);
+    const cat = form.category as { label: any; value: any };
     /* Create category index if not present */
-    if (!summary.details.hasOwnProperty(form.category.label)) {
-      summary.details[form.category.label] = {};
+    if (!summary.details.hasOwnProperty(cat.label)) {
+      summary.details[cat.label] = {};
     }
     /* Create subcategory index if not present */
     if (
-      !summary.details[form.category.label].hasOwnProperty(
-        form.subCategory.label
+      !summary.details[cat.label].hasOwnProperty(
+        (form.subCategory as ReactSelectType).label
       )
     ) {
-      summary.details[form.category.label][form.subCategory.label] = 0;
+      summary.details[cat.label][
+        (form.subCategory as ReactSelectType).label
+      ] = 0;
     }
-    summary.details[form.category.label][form.subCategory.label] += diff;
+    summary.details[cat.label][(form.subCategory as ReactSelectType).label] +=
+      diff;
 
-    if (form.subCategory.isProductive) {
+    if ((form.subCategory as SubCategory).isProductive) {
       summary.totalProductive += diff;
     }
   });
@@ -105,18 +118,32 @@ export const summaryTime = (formValues) => {
   return summary;
 };
 
-export const getStartEndDateOfMonth = (date) => {
+export const getStartEndDateOfMonth = (date: Date) => {
   return {
     startDate: moment(date).startOf("month").format("YYYY-MM-DD"),
     endDate: moment(date).endOf("month").format("YYYY-MM-DD"),
   };
 };
 
-export const getMonthName = (calDate) => {
+export const getMonthName = (calDate: {
+  startDate: string;
+  endDate: string;
+}) => {
   return moment(calDate.startDate).format("MMMM YYYY");
 };
 
 /* Check if it's rendered from server */
 export const isServer = () => {
   return typeof window === "undefined";
+};
+
+/* Subcategory name based on id */
+export const getSubcatName = (
+  categoryData: Category,
+  subCategoryId: string
+) => {
+  const subCategory = categoryData.subCategories.find(
+    (subCat: any) => subCat._id === subCategoryId
+  );
+  return subCategory ? subCategory?.name : "";
 };
