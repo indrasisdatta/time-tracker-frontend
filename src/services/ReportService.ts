@@ -3,5 +3,5 @@ import { axios } from "./axios";
 
 /* Show report search data */
 export const reportData = async (data: ReportPayload) => {
-  return await axios.post("timesheet/summary", data);
+  return await axios.post("timesheet/report", data);
 };

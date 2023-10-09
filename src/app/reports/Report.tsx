@@ -1,5 +1,4 @@
-import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { ReportSearch } from "./ReportSearch";
 import { Table } from "../common/components/tables/Table";
 import { ReportGrid, ReportSearchFormValues } from "@/models/Report";
@@ -24,6 +23,7 @@ export const Report = () => {
       subCategory: "",
       dateRange: getStartEndDateOfMonth(new Date()),
     });
+  const [reportRows, setReportRows] = useState([]);
 
   const fetchReport = async () => {
     const {
@@ -43,7 +43,8 @@ export const Report = () => {
       startDate,
       endDate,
     };
-    await reportData(payload);
+    const { data } = await reportData(payload);
+    return data;
   };
 
   const {
@@ -60,8 +61,7 @@ export const Report = () => {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("category", {
-        id: "category",
+      columnHelper.accessor((row) => `${row.categoryData.name}`, {
         cell: (info) => info.renderValue(),
         header: "Category",
       }),
@@ -79,19 +79,12 @@ export const Report = () => {
     []
   );
 
-  const data = [
-    {
-      category: "Self Learn",
-      subCategory: "Next.js",
-      totalTime: 650,
-    },
-    {
-      category: "CTS",
-      subCategory: "Verizon",
-      totalTime: 440,
-    },
-  ];
-
+  useEffect(() => {
+    if (reportApiData?.data) {
+      setReportRows(reportApiData?.data);
+    }
+  }, [reportApiData]);
+  console.log("reportApiData", reportApiData);
   return (
     <div className="container mx-auto">
       <div className="flex justify-between">
@@ -109,7 +102,7 @@ export const Report = () => {
         <div className="w-full md:flex">
           {/* Grid starts */}
           <div className="py-2 md:w-1/2">
-            <Table columns={columns} data={data} />
+            <Table columns={columns} data={reportRows} />
           </div>
           {/* Grid ends */}
           {/* Graph starts */}

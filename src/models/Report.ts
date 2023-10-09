@@ -1,3 +1,5 @@
+import { Category } from "./Category";
+
 export type ReportSearchFormValues = {
   category: string | { label: string; value: string };
   subCategory: string | { label: string; value: string };
@@ -12,7 +14,8 @@ export type ReportSearchPayload = {
 };
 
 export type ReportGrid = {
-  category: string;
+  category?: string;
+  categoryData: Category;
   subCategory: string;
   totalTime: number;
 };
