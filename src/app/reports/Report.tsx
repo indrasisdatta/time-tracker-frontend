@@ -10,10 +10,15 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { ReportGraph } from "./ReportGraph";
-import { getStartEndDateOfMonth } from "@/utils/helper";
+import {
+  convertToHrMin,
+  getStartEndDateOfMonth,
+  getSubcatName,
+} from "@/utils/helper";
 import { useQuery } from "react-query";
 import { reportData } from "@/services/ReportService";
 import { ReactSelectType } from "@/models/Timesheet";
+import { Loader } from "../common/components/Loader";
 
 export const Report = () => {
   /* Search payload used to fetch data for both grid and chart */
@@ -55,6 +60,7 @@ export const Report = () => {
   } = useQuery({
     queryKey: ["report", reportSearchPayload],
     queryFn: () => fetchReport(),
+    refetchOnWindowFocus: false,
   });
 
   const columnHelper = createColumnHelper<ReportGrid>();
@@ -67,12 +73,19 @@ export const Report = () => {
       }),
       columnHelper.accessor("subCategory", {
         id: "subCategory",
-        cell: (info) => info.renderValue(),
+        cell: (info) => {
+          return getSubcatName(
+            info.row?.original?.categoryData,
+            info.getValue()
+          );
+        },
         header: "Sub-category",
       }),
       columnHelper.accessor("totalTime", {
         id: "totalTime",
-        cell: (info) => info.renderValue(),
+        cell: (info) => {
+          return convertToHrMin(info.getValue(), true);
+        },
         header: "Time spent",
       }),
     ],
@@ -84,7 +97,7 @@ export const Report = () => {
       setReportRows(reportApiData?.data);
     }
   }, [reportApiData]);
-  console.log("reportApiData", reportApiData);
+  // console.log("reportRows >>", reportRows);
   return (
     <div className="container mx-auto">
       <div className="flex justify-between">
@@ -100,16 +113,41 @@ export const Report = () => {
       {/* Search form ends */}
       <div className="mt-4 flex flex-col">
         <div className="w-full md:flex">
-          {/* Grid starts */}
-          <div className="py-2 md:w-1/2">
-            <Table columns={columns} data={reportRows} />
-          </div>
-          {/* Grid ends */}
-          {/* Graph starts */}
-          <div className="py-2 md:w-1/2">
-            <ReportGraph />
-          </div>
-          {/* Graph ends */}
+          {/* Loading data */}
+          {isLoadingReport && (
+            <div className="w-full">
+              <Loader className="m-auto my-8 flex" />
+            </div>
+          )}
+          {/* Error message */}
+          {isErrorReport && (
+            <>
+              <div className="py-2 w-full">
+                <div className="m-auto my-3 text-center">
+                  <p className="mb-3">
+                    {(reportError as Error)?.message
+                      ? (reportError as Error).message
+                      : "Something went wrong. Please try again later."}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+          {/* Success */}
+          {reportApiData && (
+            <>
+              {/* Grid starts */}
+              <div className="py-2 md:w-1/2">
+                <Table columns={columns} data={reportRows} />
+              </div>
+              {/* Grid ends */}
+              {/* Graph starts */}
+              <div className="py-2 md:w-1/2">
+                <ReportGraph reportRows={reportRows} />
+              </div>
+              {/* Graph ends */}
+            </>
+          )}
         </div>
       </div>
     </div>

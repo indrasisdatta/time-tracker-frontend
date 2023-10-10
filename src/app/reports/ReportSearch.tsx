@@ -13,6 +13,7 @@ import { AltButton } from "../common/components/buttons/AltButton";
 import { useQuery } from "react-query";
 import { getCategories } from "@/services/CategoryService";
 import { Category, SubCategory } from "@/models/Category";
+import { getStartEndDateOfMonth } from "@/utils/helper";
 
 type DropdownOptions = {
   categoryList: any;
@@ -110,11 +111,22 @@ export const ReportSearch = ({
 
   const onSubmit = (formData: ReportSearchFormValues) => {
     console.log("Search submit", formData);
+    setReportSearchPayload({
+      category: formData.category,
+      subCategory: formData.subCategory,
+      dateRange: formData.dateRange,
+    });
   };
 
   const handleReset = () => {
     reset(defaultFormValues);
-    setDateRangeInput({ startDate: null, endDate: null });
+    const defaultDateRange = getStartEndDateOfMonth(new Date());
+    setDateRangeInput(defaultDateRange);
+    setReportSearchPayload({
+      category: "",
+      subCategory: "",
+      dateRange: defaultDateRange,
+    });
   };
 
   /* On initial load, populate datepicker with props value */
