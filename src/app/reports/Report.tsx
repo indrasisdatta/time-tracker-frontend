@@ -8,6 +8,7 @@ import {
   createColumnHelper,
   getSortedRowModel,
   SortingState,
+  Row,
 } from "@tanstack/react-table";
 import { ReportGraph } from "./ReportGraph";
 import {
@@ -86,6 +87,18 @@ export const Report = ({ reportDateRange }: { reportDateRange: string[] }) => {
             info.getValue()
           );
         },
+        sortingFn: (rowA: Row<any>, rowB: Row<any>, columnId: string) => {
+          console.log("Sorting FN", rowA, rowB, columnId);
+          const subcat1 = getSubcatName(
+            rowA?.original?.categoryData,
+            rowA?.getValue(columnId)
+          );
+          const subcat2 = getSubcatName(
+            rowB?.original?.categoryData,
+            rowB?.getValue(columnId)
+          );
+          return subcat1.localeCompare(subcat2);
+        },
         header: "Sub-category",
       }),
       columnHelper.accessor("totalTime", {
@@ -99,27 +112,12 @@ export const Report = ({ reportDateRange }: { reportDateRange: string[] }) => {
     []
   );
 
-  // useEffect(() => {
-  //   if (reportDateRange && typeof reportDateRange[0] !== "undefined") {
-  //     const [startDt, endDt] = reportDateRange[0].split("_");
-  //     if (moment(startDt).isSameOrBefore(moment(endDt))) {
-  //       setReportSearchPayload((prevState) => ({
-  //         ...prevState,
-  //         dateRange: {
-  //           startDate: startDt,
-  //           endDate: endDt,
-  //         },
-  //       }));
-  //     }
-  //   }
-  // }, [reportDateRange]);
-
   useEffect(() => {
     if (reportApiData?.data) {
       setReportRows(reportApiData?.data);
     }
   }, [reportApiData]);
-  // console.log("reportRows >>", reportRows);
+
   return (
     <div className="container mx-auto">
       <div className="flex justify-between">
