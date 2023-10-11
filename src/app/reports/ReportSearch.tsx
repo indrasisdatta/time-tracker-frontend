@@ -13,7 +13,7 @@ import { AltButton } from "../common/components/buttons/AltButton";
 import { useQuery } from "react-query";
 import { getCategories } from "@/services/CategoryService";
 import { Category, SubCategory } from "@/models/Category";
-import { getStartEndDateOfMonth } from "@/utils/helper";
+import { getStartEndDateOfMonth, reportDateRangeDisplay } from "@/utils/helper";
 
 type DropdownOptions = {
   categoryList: any;
@@ -30,9 +30,11 @@ const defaultFormValues = {
 };
 
 export const ReportSearch = ({
+  reportDateRange,
   reportSearchPayload,
   setReportSearchPayload,
 }: {
+  reportDateRange: string[];
   reportSearchPayload: ReportSearchFormValues;
   setReportSearchPayload: React.Dispatch<
     React.SetStateAction<ReportSearchFormValues>
@@ -47,7 +49,7 @@ export const ReportSearch = ({
       case "CATEGORY_LOAD":
         return { ...state, categoryList: action.payload };
       case "CATEGORY_SELECT":
-        console.log("Cat select");
+        // console.log("Cat select");
         let subCats: any[] = [];
         let matchingCat = state.categoryList.find(
           (cat: any) => cat.value === action.payload.catId
@@ -105,7 +107,6 @@ export const ReportSearch = ({
     setValue,
     reset,
   } = useForm<ReportSearchFormValues>({
-    // defaultValues: defaultFormValues,
     defaultValues: reportSearchPayload,
   });
 
@@ -119,14 +120,14 @@ export const ReportSearch = ({
   };
 
   const handleReset = () => {
-    reset(defaultFormValues);
-    const defaultDateRange = getStartEndDateOfMonth(new Date());
-    setDateRangeInput(defaultDateRange);
-    setReportSearchPayload({
-      category: "",
-      subCategory: "",
-      dateRange: defaultDateRange,
-    });
+    const formValues = reportDateRangeDisplay(
+      reportDateRange,
+      defaultFormValues
+    );
+    reset(formValues);
+    const dateRange = formValues.dateRange;
+    setDateRangeInput(dateRange);
+    setReportSearchPayload(formValues);
   };
 
   /* On initial load, populate datepicker with props value */
@@ -144,7 +145,6 @@ export const ReportSearch = ({
       categoryData?.status == 1 &&
       categoryData?.data?.length > 0
     ) {
-      console.log("Category load");
       dispatchDropdownOptions({
         type: "CATEGORY_LOAD",
         payload: categoryData.data.map((cat: Category) => ({
@@ -158,7 +158,7 @@ export const ReportSearch = ({
 
   /* Category, subcategory change event handler */
   const handleChange = (type: string, selectedOption: any) => {
-    console.log("Change handler:", type, selectedOption);
+    // console.log("Change handler:", type, selectedOption);
     if (type === "category") {
       /* Reset the subcategory value when the category changes */
       setValue(`subCategory`, "");

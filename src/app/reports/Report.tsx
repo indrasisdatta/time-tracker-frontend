@@ -14,19 +14,26 @@ import {
   convertToHrMin,
   getStartEndDateOfMonth,
   getSubcatName,
+  reportDateRangeDisplay,
 } from "@/utils/helper";
 import { useQuery } from "react-query";
 import { reportData } from "@/services/ReportService";
 import { ReactSelectType } from "@/models/Timesheet";
 import { Loader } from "../common/components/Loader";
 
-export const Report = () => {
+export const Report = ({ reportDateRange }: { reportDateRange: string[] }) => {
+  console.log("Report date range", reportDateRange);
+
   /* Search payload used to fetch data for both grid and chart */
   const [reportSearchPayload, setReportSearchPayload] =
-    useState<ReportSearchFormValues>({
-      category: "",
-      subCategory: "",
-      dateRange: getStartEndDateOfMonth(new Date()),
+    useState<ReportSearchFormValues>(() => {
+      let tempState = {
+        category: "",
+        subCategory: "",
+        dateRange: { startDate: "", endDate: "" },
+      };
+      /* If reportDateRange prop sends date (in URL param) then set state as this date, otherwise show default date */
+      return reportDateRangeDisplay(reportDateRange, tempState);
     });
   const [reportRows, setReportRows] = useState([]);
 
@@ -92,6 +99,21 @@ export const Report = () => {
     []
   );
 
+  // useEffect(() => {
+  //   if (reportDateRange && typeof reportDateRange[0] !== "undefined") {
+  //     const [startDt, endDt] = reportDateRange[0].split("_");
+  //     if (moment(startDt).isSameOrBefore(moment(endDt))) {
+  //       setReportSearchPayload((prevState) => ({
+  //         ...prevState,
+  //         dateRange: {
+  //           startDate: startDt,
+  //           endDate: endDt,
+  //         },
+  //       }));
+  //     }
+  //   }
+  // }, [reportDateRange]);
+
   useEffect(() => {
     if (reportApiData?.data) {
       setReportRows(reportApiData?.data);
@@ -106,6 +128,7 @@ export const Report = () => {
       {/* Search form starts */}
       <div className="mt-3">
         <ReportSearch
+          reportDateRange={reportDateRange}
           reportSearchPayload={reportSearchPayload}
           setReportSearchPayload={setReportSearchPayload}
         />

@@ -1,13 +1,13 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Report } from "./Report";
+import { Report } from "../Report";
 
 const queryClient = new QueryClient();
 
-const ReportPage = () => {
+const ReportPage = ({ params: { reportDateRange } }: { params: any }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Report />
+      <Report reportDateRange={reportDateRange} />
     </QueryClientProvider>
   );
 };

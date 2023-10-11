@@ -1,4 +1,5 @@
 import { Category, SubCategory } from "@/models/Category";
+import { ReportSearchFormValues } from "@/models/Report";
 import {
   ReactSelectType,
   TimesheetPayload,
@@ -146,4 +147,35 @@ export const getSubcatName = (
     (subCat: any) => subCat._id === subCategoryId
   );
   return subCategory ? subCategory?.name : "";
+};
+
+/**
+ *
+ * @param reportDateRange - URL date range param
+ * @param reportSearchPayload - payload used to display report grid, chart
+ * @returns tempPayload - Updated payload with correct date
+ */
+export const reportDateRangeDisplay = (
+  reportDateRange: string[],
+  reportSearchPayload: ReportSearchFormValues
+) => {
+  let tempPayload = JSON.parse(JSON.stringify(reportSearchPayload));
+  if (reportDateRange && typeof reportDateRange[0] !== "undefined") {
+    const [startDt, endDt] = reportDateRange[0].split("_");
+    if (moment(startDt).isSameOrBefore(moment(endDt))) {
+      tempPayload = {
+        ...tempPayload,
+        dateRange: {
+          startDate: startDt,
+          endDate: endDt,
+        },
+      };
+    }
+  } else {
+    tempPayload = {
+      ...tempPayload,
+      dateRange: getStartEndDateOfMonth(new Date()),
+    };
+  }
+  return tempPayload;
 };
