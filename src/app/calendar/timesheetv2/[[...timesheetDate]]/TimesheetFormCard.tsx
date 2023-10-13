@@ -68,6 +68,15 @@ const TimesheetFormComponent = ({
     endDate: null,
   });
 
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalValues, setModalValues] = useState<Timeslot>({
+    startTime: "",
+    endTime: "",
+    category: "",
+    subCategory: "",
+    isProductive: false,
+  });
+
   const saveTimesheetApi = async (payload: TimesheetPayload): Promise<any> => {
     const { data } = await saveTimesheet(payload);
     return data;
@@ -332,6 +341,14 @@ const TimesheetFormComponent = ({
   console.log("Form values", formValues);
   console.log("Timesheet data", timesheetData);
 
+  const onSubmitModal = (e: any) => {
+    console.log("On submit modal", e);
+  };
+
+  const onCloseModal = (e: any) => {
+    console.log("On close modal", e);
+  };
+
   const addRow = () => {
     /* Next row start time should match prev row end time */
     const timeslotsLen = formValues.timeslots.length;
@@ -339,8 +356,15 @@ const TimesheetFormComponent = ({
     if (timeslotsLen > 0) {
       startTime = formValues.timeslots[timeslotsLen - 1].endTime;
     }
-    /* Open popup */
-
+    /* Open popup with populated values */
+    setModalValues({
+      startTime,
+      endTime: "",
+      category: "",
+      subCategory: "",
+      isProductive: false,
+    });
+    setShowModal(true);
     // append({
     //   startTime,
     //   endTime: "",
@@ -559,7 +583,13 @@ const TimesheetFormComponent = ({
               ))}
             </ul>
             {/* Timesheet listing ends */}
-            {/* <PopupForm >{inputHtml()}</PopupForm> */}
+            <PopupForm
+              modalValues={modalValues}
+              showModal={showModal}
+              setShowModal={setShowModal}
+              onSubmitModal={onSubmitModal}
+              onCloseModal={onCloseModal}
+            />
 
             {/* Timesheet enry input rows starts */}
             {timeslotFields.map((field, index) => (
