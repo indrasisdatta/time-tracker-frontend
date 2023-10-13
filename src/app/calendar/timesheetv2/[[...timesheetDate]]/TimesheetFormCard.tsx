@@ -6,12 +6,7 @@ import Datepicker, {
   DateValueType,
 } from "react-tailwindcss-datepicker";
 import "../../calendar.scss";
-import {
-  DocumentCheckIcon,
-  PencilIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/20/solid";
+import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
@@ -25,6 +20,7 @@ import {
 } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
 import {
+  ModalValues,
   ReactSelectType,
   TimesheetPayload,
   Timeslot,
@@ -69,12 +65,15 @@ const TimesheetFormComponent = ({
   });
 
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [modalValues, setModalValues] = useState<Timeslot>({
+  const [modalValues, setModalValues] = useState<ModalValues>({
     startTime: "",
     endTime: "",
     category: "",
     subCategory: "",
     isProductive: false,
+    prevEndTime: null,
+    index: null,
+    formValues: defaultTimesheetFormData,
   });
 
   const saveTimesheetApi = async (payload: TimesheetPayload): Promise<any> => {
@@ -363,6 +362,9 @@ const TimesheetFormComponent = ({
       category: "",
       subCategory: "",
       isProductive: false,
+      prevEndTime: null,
+      index: timeslotsLen,
+      formValues,
     });
     setShowModal(true);
     // append({
@@ -585,6 +587,7 @@ const TimesheetFormComponent = ({
             {/* Timesheet listing ends */}
             <PopupForm
               modalValues={modalValues}
+              formValues={formValues}
               showModal={showModal}
               setShowModal={setShowModal}
               onSubmitModal={onSubmitModal}

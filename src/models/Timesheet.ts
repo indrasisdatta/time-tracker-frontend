@@ -21,3 +21,9 @@ export type CalendarPayload = {
   startDate: string;
   endDate: string;
 };
+
+export type ModalValues = Timeslot & {
+  prevEndTime: null | string;
+  index: null | number;
+  formValues: TimesheetPayload;
+};
