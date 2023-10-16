@@ -18,8 +18,8 @@ import { SubCategory } from "@/models/Category";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { calculateTimeDifference } from "@/utils/helper";
 
-import { Timepicker } from "react-timepicker";
-import "react-timepicker/timepicker.css";
+// import { Timepicker } from "react-timepicker";
+// import "react-timepicker/timepicker.css";
 
 type DropdownOptions = {
   categoryList: any;
@@ -155,7 +155,7 @@ const PopupForm = ({
       {showModal ? (
         <>
           <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-            <Timepicker />
+            {/* <Timepicker /> */}
 
             <div className="relative my-6 mx-auto w-96">
               {/*content*/}

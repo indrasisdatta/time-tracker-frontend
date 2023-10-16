@@ -6,6 +6,7 @@ export type ReactSelectType = {
 };
 
 export interface Timeslot {
+  id?: string;
   startTime: string;
   endTime: string;
   category: string | ReactSelectType;

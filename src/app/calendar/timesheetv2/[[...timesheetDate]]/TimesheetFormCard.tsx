@@ -1,12 +1,23 @@
 "use client";
-import React, { memo, useEffect, useReducer, useState } from "react";
+import React, {
+  SyntheticEvent,
+  memo,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Datepicker, {
   DateType,
   DateValueType,
 } from "react-tailwindcss-datepicker";
 import "../../calendar.scss";
-import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
+import {
+  DocumentCheckIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@heroicons/react/20/solid";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
@@ -38,7 +49,9 @@ import {
 import TimesheetSummary from "./TimesheetSummary";
 import moment from "moment";
 import Link from "next/link";
-import PopupForm from "./PopupForm";
+// import { AnalogTime } from "react-clock-select";
+
+// import PopupForm from "./PopupForm";
 
 type DropdownOptions = {
   categoryList: any;
@@ -75,6 +88,7 @@ const TimesheetFormComponent = ({
     index: null,
     formValues: defaultTimesheetFormData,
   });
+  const [editingRow, setEditingRow] = useState<Timeslot | null>();
 
   const saveTimesheetApi = async (payload: TimesheetPayload): Promise<any> => {
     const { data } = await saveTimesheet(payload);
@@ -422,6 +436,30 @@ const TimesheetFormComponent = ({
     return null;
   };
 
+  const handleEditRow = (e: SyntheticEvent, field: Timeslot) => {
+    setEditingRow(field);
+  };
+
+  const handleSaveRow = (e: SyntheticEvent, field: Timeslot) => {
+    setEditingRow(null);
+  };
+
+  const handleCancel = (index: number, field: Timeslot) => {
+    console.log("Revert to Prev value:", editingRow);
+    const fieldArr = [
+      "startTime",
+      "endTime",
+      "category",
+      "subCategory",
+      "isProductive",
+    ];
+    fieldArr.map((f) => {
+      setValue(`timeslots.${index}.${f}`, editingRow[f]);
+    });
+
+    setEditingRow(null);
+  };
+
   return (
     <div>
       <Toaster />
@@ -549,7 +587,12 @@ const TimesheetFormComponent = ({
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {timeslotFields.map((field, index) => (
                 <li key={field.id} className="py-3 sm:py-2">
-                  <div className="flex items-center space-x-4">
+                  {/* Read only mode */}
+                  <div
+                    className={`flex items-center space-x-4 ${
+                      !editingRow || editingRow?.id === field.id ? "" : "hidden"
+                    }`}
+                  >
                     <div className="w-5/12 md:w-5/12">
                       <p className="block md:inline-block text-sm font-medium text-gray-900 truncate dark:text-white">
                         {(field?.category as ReactSelectType)?.label}
@@ -572,7 +615,13 @@ const TimesheetFormComponent = ({
                     </div>
                     <div className="w-2/12 md:w-2/12">
                       <p className="text-right font-medium text-gray-900 truncate dark:text-white">
-                        <Link href="" className="mr-2" onClick={(e) => {}}>
+                        <Link
+                          href=""
+                          className="mr-2"
+                          onClick={(e) => {
+                            handleEditRow(e, field);
+                          }}
+                        >
                           <PencilIcon className="h-4 w-4" />
                         </Link>
                         <Link href="" onClick={() => remove(index)}>
@@ -581,287 +630,332 @@ const TimesheetFormComponent = ({
                       </p>
                     </div>
                   </div>
+                  {/* Editable mode */}
+                  <div
+                    key={field.id}
+                    className={`md:flex ${
+                      editingRow && editingRow?.id == field.id ? "" : "hidden"
+                    } timeslot-row md:gap-x-2 mb-3`}
+                  >
+                    {/* Start time */}
+                    <div className="w-full md:w-2/12">
+                      <Controller
+                        control={control}
+                        name={`timeslots.${index}.startTime`}
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Select start time",
+                          },
+                          validate: () => {
+                            const validateObj = {
+                              value: true,
+                              message: "",
+                            };
+                            let currStartTime = getValues(
+                              `timeslots.${index}.startTime`
+                            );
+                            let currEndTime = getValues(
+                              `timeslots.${index}.endTime`
+                            );
+                            if (
+                              !!currStartTime &&
+                              !!currEndTime &&
+                              currStartTime > currEndTime
+                            ) {
+                              validateObj.value = false;
+                              validateObj.message =
+                                "Start time cannot be greater than end time";
+                            }
+                            if (index > 0) {
+                              let prevEndTime = getValues(
+                                `timeslots.${Number(index) - 1}.endTime`
+                              );
+                              console.log(
+                                `Row ${index} Validate prev end time ${prevEndTime} with current start time ${currStartTime}`
+                              );
+                              if (
+                                !!currStartTime &&
+                                !!prevEndTime &&
+                                currStartTime !== prevEndTime
+                              ) {
+                                validateObj.value = false;
+                                validateObj.message = `Not matching previous end time ${prevEndTime}`;
+                              }
+                            }
+                            console.log("Validate obj startTime", validateObj);
+                            return validateObj.message.length > 0
+                              ? validateObj.message
+                              : true;
+                          },
+                        }}
+                        render={({
+                          field: { onChange, onBlur, value, ref },
+                          fieldState: { invalid, isTouched, isDirty, error },
+                          formState,
+                        }) => (
+                          <TimePicker
+                            value={value}
+                            className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
+                              hasError(`timeslots.${index}.startTime`)
+                                ? "ring-red-600"
+                                : "ring-gray-300"
+                            }`}
+                            format="HH:mm"
+                            onChange={(selectedOption) => {
+                              onChange(selectedOption);
+                              handleChange(index, "startTime", value);
+                            }}
+                          />
+                          // <AnalogTime
+                          //   type="picker"
+                          //   value={value}
+                          //   hoursFormat="24"
+                          //   placeholder="Start time"
+                          //   size="1.5"
+                          //   selectorPosition="modal"
+                          //   onConfirm={(e, value: string) => {
+                          //     handleChange(index, "startTime", value);
+                          //   }}
+                          // />
+                        )}
+                      />
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.startTime && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.startTime?.message}
+                          </span>
+                        )}
+                    </div>
+                    {/* End time */}
+                    <div className="w-full md:w-2/12 mt-3 md:mt-0">
+                      <Controller
+                        control={control}
+                        name={`timeslots.${index}.endTime`}
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Select end time",
+                          },
+                        }}
+                        render={({
+                          field: { onChange, onBlur, value, ref },
+                          fieldState: { invalid, isTouched, isDirty, error },
+                          formState,
+                        }) => (
+                          <TimePicker
+                            value={value}
+                            className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
+                              hasError(`timeslots.${index}.endTime`)
+                                ? "ring-red-600"
+                                : "ring-gray-300"
+                            }`}
+                            format="HH:mm"
+                            onChange={(selectedOption) => {
+                              onChange(selectedOption);
+                              handleChange(index, "endTime", value);
+                            }}
+                          />
+                        )}
+                      />
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.endTime && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.endTime?.message}
+                          </span>
+                        )}
+                    </div>
+                    <div className="w-full md:w-2/12 mt-3 md:mt-0">
+                      <Controller
+                        control={control}
+                        name={`timeslots.${index}.category`}
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Select category",
+                          },
+                        }}
+                        render={({
+                          field: { onChange, onBlur, value, ref },
+                          fieldState: { invalid, isTouched, isDirty, error },
+                          formState,
+                        }) => (
+                          <Select
+                            primaryColor={"indigo"}
+                            placeholder="Select category"
+                            value={value as any as SelectValue}
+                            onChange={(selectedOption) => {
+                              onChange(selectedOption);
+                              handleChange(index, "category", selectedOption);
+                            }}
+                            isSearchable={true}
+                            options={dropdownOptions?.categoryList}
+                            classNames={{
+                              menuButton: () =>
+                                `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
+                                  hasError(`timeslots.${index}.category`)
+                                    ? "ring-red-600"
+                                    : "ring-gray-300"
+                                }`,
+                              menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
+                              list: "opt-div dark:bg-slate-800",
+                              listItem: ({ isSelected }: any) =>
+                                `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
+                                  isSelected
+                                    ? `text-white bg-blue-500`
+                                    : `text-gray-900 dark:text-gray-200 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
+                                }`,
+                              searchBox:
+                                "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
+                            }}
+                          />
+                        )}
+                      />
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.category && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.category?.message}
+                          </span>
+                        )}
+                    </div>
+                    <div className="w-full md:w-2/12 mt-3 md:mt-0">
+                      <Controller
+                        control={control}
+                        name={`timeslots.${index}.subCategory`}
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Select sub-category",
+                          },
+                        }}
+                        render={({
+                          field: { onChange, onBlur, value, ref },
+                          fieldState: { invalid, isTouched, isDirty, error },
+                          formState,
+                        }) => (
+                          <Select
+                            primaryColor={"indigo"}
+                            placeholder="Select sub-category"
+                            // value={value as any as SelectValue}
+                            value={subCatSelectedValue(index, value)}
+                            onChange={(selectedOption) => {
+                              onChange(selectedOption);
+                              handleChange(
+                                index,
+                                "subCategory",
+                                selectedOption
+                              );
+                            }}
+                            isSearchable={true}
+                            isDisabled={
+                              !dropdownOptions ||
+                              !dropdownOptions?.subCategoryList ||
+                              dropdownOptions?.subCategoryList?.length === 0 ||
+                              (dropdownOptions?.subCategoryList?.length > 0 &&
+                                typeof dropdownOptions?.subCategoryList[
+                                  index
+                                ] === "undefined")
+                                ? true
+                                : false
+                            }
+                            options={
+                              dropdownOptions?.subCategoryList?.length > 0 &&
+                              typeof dropdownOptions?.subCategoryList[index] !==
+                                "undefined"
+                                ? dropdownOptions?.subCategoryList[index]
+                                : []
+                            }
+                            classNames={{
+                              menuButton: () =>
+                                `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
+                                  hasError(`timeslots.${index}.subCategory`)
+                                    ? "ring-red-600"
+                                    : "ring-gray-300"
+                                }`,
+                              menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
+                              list: "opt-div dark:bg-slate-800",
+                              listItem: ({ isSelected }: any) =>
+                                `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
+                                  isSelected
+                                    ? `text-white bg-blue-500`
+                                    : `text-gray-900 dark:text-gray-200 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
+                                }`,
+                              searchBox:
+                                "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
+                            }}
+                          />
+                        )}
+                      />
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.subCategory && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.subCategory?.message}
+                          </span>
+                        )}
+                    </div>
+                    {/* <div className="w-full md:w-2/12 mt-3 md:mt-0 flex justify-center items-center">
+                      <span>
+                        {formValues.timeslots &&
+                          formValues.timeslots.length > 0 &&
+                          calculateTimeDifference(
+                            formValues.timeslots[index]?.startTime,
+                            formValues.timeslots[index]?.endTime,
+                            true
+                          )}
+                      </span>
+                    </div> */}
+                    <div className="w-full md:w-1/12 mt-3 md:mt-0">
+                      <button
+                        type="button"
+                        className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
+                        onClick={(e) => handleSaveRow(e, field)}
+                      >
+                        <DocumentCheckIcon className="h-4 w-4 hidden md:block" />
+                        <span className="md:hidden font-normal text-sm">
+                          Save
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-md bg-red-500 hover:bg-red-700 px-2.5 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 md:w-auto md:d-flex justify-content-right"
+                        onClick={(e) => handleCancel(index, field)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                          />
+                        </svg>
+
+                        <span className="md:hidden font-normal text-sm">
+                          Cancel
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
             {/* Timesheet listing ends */}
-            <PopupForm
+            {/* <PopupForm
               modalValues={modalValues}
               formValues={formValues}
               showModal={showModal}
               setShowModal={setShowModal}
               onSubmitModal={onSubmitModal}
               onCloseModal={onCloseModal}
-            />
-
-            {/* Timesheet enry input rows starts */}
-            {timeslotFields.map((field, index) => (
-              <div key={field.id} className="hidden timeslot-row gap-x-2 mb-3">
-                {/* Start time */}
-                <div className="w-full md:w-2/12">
-                  <Controller
-                    control={control}
-                    name={`timeslots.${index}.startTime`}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Select start time",
-                      },
-                      validate: () => {
-                        const validateObj = {
-                          value: true,
-                          message: "",
-                        };
-                        let currStartTime = getValues(
-                          `timeslots.${index}.startTime`
-                        );
-                        let currEndTime = getValues(
-                          `timeslots.${index}.endTime`
-                        );
-                        if (
-                          !!currStartTime &&
-                          !!currEndTime &&
-                          currStartTime > currEndTime
-                        ) {
-                          validateObj.value = false;
-                          validateObj.message =
-                            "Start time cannot be greater than end time";
-                        }
-                        if (index > 0) {
-                          let prevEndTime = getValues(
-                            `timeslots.${Number(index) - 1}.endTime`
-                          );
-                          console.log(
-                            `Row ${index} Validate prev end time ${prevEndTime} with current start time ${currStartTime}`
-                          );
-                          if (
-                            !!currStartTime &&
-                            !!prevEndTime &&
-                            currStartTime !== prevEndTime
-                          ) {
-                            validateObj.value = false;
-                            validateObj.message = `Not matching previous end time ${prevEndTime}`;
-                          }
-                        }
-                        console.log("Validate obj startTime", validateObj);
-                        return validateObj.message.length > 0
-                          ? validateObj.message
-                          : true;
-                      },
-                    }}
-                    render={({
-                      field: { onChange, onBlur, value, ref },
-                      fieldState: { invalid, isTouched, isDirty, error },
-                      formState,
-                    }) => (
-                      <TimePicker
-                        value={value}
-                        className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
-                          hasError(`timeslots.${index}.startTime`)
-                            ? "ring-red-600"
-                            : "ring-gray-300"
-                        }`}
-                        format="HH:mm"
-                        onChange={(selectedOption) => {
-                          onChange(selectedOption);
-                          handleChange(index, "startTime", value);
-                        }}
-                        // value={field.startTime}
-                      />
-                    )}
-                  />
-                  {errors?.timeslots && errors?.timeslots[index]?.startTime && (
-                    <span className="inline-flex text-sm text-red-700">
-                      {errors?.timeslots[index]?.startTime?.message}
-                    </span>
-                  )}
-                </div>
-                {/* End time */}
-                <div className="w-full md:w-2/12">
-                  <Controller
-                    control={control}
-                    name={`timeslots.${index}.endTime`}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Select end time",
-                      },
-                    }}
-                    render={({
-                      field: { onChange, onBlur, value, ref },
-                      fieldState: { invalid, isTouched, isDirty, error },
-                      formState,
-                    }) => (
-                      <TimePicker
-                        value={value}
-                        className={`rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex sm:max-w-sm ${
-                          hasError(`timeslots.${index}.endTime`)
-                            ? "ring-red-600"
-                            : "ring-gray-300"
-                        }`}
-                        format="HH:mm"
-                        onChange={(selectedOption) => {
-                          onChange(selectedOption);
-                          handleChange(index, "endTime", value);
-                        }}
-                      />
-                    )}
-                  />
-                  {errors?.timeslots && errors?.timeslots[index]?.endTime && (
-                    <span className="inline-flex text-sm text-red-700">
-                      {errors?.timeslots[index]?.endTime?.message}
-                    </span>
-                  )}
-                </div>
-                <div className="w-full md:w-2/12">
-                  <Controller
-                    control={control}
-                    name={`timeslots.${index}.category`}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Select category",
-                      },
-                    }}
-                    render={({
-                      field: { onChange, onBlur, value, ref },
-                      fieldState: { invalid, isTouched, isDirty, error },
-                      formState,
-                    }) => (
-                      <Select
-                        primaryColor={"indigo"}
-                        placeholder="Select category"
-                        value={value as any as SelectValue}
-                        onChange={(selectedOption) => {
-                          onChange(selectedOption);
-                          handleChange(index, "category", selectedOption);
-                        }}
-                        isSearchable={true}
-                        options={dropdownOptions?.categoryList}
-                        classNames={{
-                          menuButton: () =>
-                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
-                              hasError(`timeslots.${index}.category`)
-                                ? "ring-red-600"
-                                : "ring-gray-300"
-                            }`,
-                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
-                          list: "opt-div dark:bg-slate-800",
-                          listItem: ({ isSelected }: any) =>
-                            `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
-                              isSelected
-                                ? `text-white bg-blue-500`
-                                : `text-gray-900 dark:text-gray-200 
-                                hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
-                            }`,
-                          searchBox:
-                            "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
-                        }}
-                      />
-                    )}
-                  />
-                  {errors?.timeslots && errors?.timeslots[index]?.category && (
-                    <span className="inline-flex text-sm text-red-700">
-                      {errors?.timeslots[index]?.category?.message}
-                    </span>
-                  )}
-                </div>
-                <div className="w-full md:w-2/12">
-                  <Controller
-                    control={control}
-                    name={`timeslots.${index}.subCategory`}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Select sub-category",
-                      },
-                    }}
-                    render={({
-                      field: { onChange, onBlur, value, ref },
-                      fieldState: { invalid, isTouched, isDirty, error },
-                      formState,
-                    }) => (
-                      <Select
-                        primaryColor={"indigo"}
-                        placeholder="Select sub-category"
-                        // value={value as any as SelectValue}
-                        value={subCatSelectedValue(index, value)}
-                        onChange={(selectedOption) => {
-                          onChange(selectedOption);
-                          handleChange(index, "subCategory", selectedOption);
-                        }}
-                        isSearchable={true}
-                        isDisabled={
-                          !dropdownOptions ||
-                          !dropdownOptions?.subCategoryList ||
-                          dropdownOptions?.subCategoryList?.length === 0 ||
-                          (dropdownOptions?.subCategoryList?.length > 0 &&
-                            typeof dropdownOptions?.subCategoryList[index] ===
-                              "undefined")
-                            ? true
-                            : false
-                        }
-                        options={
-                          dropdownOptions?.subCategoryList?.length > 0 &&
-                          typeof dropdownOptions?.subCategoryList[index] !==
-                            "undefined"
-                            ? dropdownOptions?.subCategoryList[index]
-                            : []
-                        }
-                        classNames={{
-                          menuButton: () =>
-                            `select-text rounded-md shadow-sm ring-1 ring-inset focus:outline-0 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300  sm:max-w-sm ${
-                              hasError(`timeslots.${index}.subCategory`)
-                                ? "ring-red-600"
-                                : "ring-gray-300"
-                            }`,
-                          menu: "absolute z-10 w-full shadow-lg border rounded py-1 text-sm text-gray-900 dark:text-gray-200 dark:bg-slate-800",
-                          list: "opt-div dark:bg-slate-800",
-                          listItem: ({ isSelected }: any) =>
-                            `block transition duration-200 px-2 py-2 cursor-pointer select-none truncate rounded ${
-                              isSelected
-                                ? `text-white bg-blue-500`
-                                : `text-gray-900 dark:text-gray-200 
-                                hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white`
-                            }`,
-                          searchBox:
-                            "w-full border-0 bg-transparent py-1.5 pl-8 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus-within:rounded-md focus-within:ring-1 focus-within:ring-inset focus-visible:outline-none focus-within:ring-blue-800 dark:focus-within:ring-blue-400",
-                        }}
-                      />
-                    )}
-                  />
-                  {errors?.timeslots &&
-                    errors?.timeslots[index]?.subCategory && (
-                      <span className="inline-flex text-sm text-red-700">
-                        {errors?.timeslots[index]?.subCategory?.message}
-                      </span>
-                    )}
-                </div>
-                <div className="w-full md:w-2/12 flex justify-center items-center">
-                  <span>
-                    {formValues.timeslots &&
-                      formValues.timeslots.length > 0 &&
-                      calculateTimeDifference(
-                        formValues.timeslots[index]?.startTime,
-                        formValues.timeslots[index]?.endTime,
-                        true
-                      )}
-                  </span>
-                </div>
-                <div className="w-full md:w-1/12">
-                  <button
-                    type="button"
-                    // className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded  w-full md:w-auto md:d-flex justify-content-right"
-                    className="rounded-md bg-red-500 hover:bg-red-700 px-2.5 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 md:w-auto md:d-flex justify-content-right"
-                    onClick={() => remove(index)}
-                    data-testid={`del-btn-${index}`}
-                  >
-                    <TrashIcon className="h-4 w-4 hidden md:block" />
-                  </button>
-                </div>
-              </div>
-            ))}
-            {/* Timesheet entry input rows ends */}
+            /> */}
 
             {/* Add row, save buttons starts */}
             {timeslotFields && timeslotFields.length > 0 && (
