@@ -88,7 +88,7 @@ const TimesheetFormComponent = ({
     index: null,
     formValues: defaultTimesheetFormData,
   });
-  const [editingRow, setEditingRow] = useState<Timeslot | null>();
+  const [editingRow, setEditingRow] = useState<Timeslot | null>(null);
 
   const saveTimesheetApi = async (payload: TimesheetPayload): Promise<any> => {
     const { data } = await saveTimesheet(payload);
@@ -214,6 +214,7 @@ const TimesheetFormComponent = ({
     getValues,
     setValue,
     reset,
+    watch,
   } = useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
@@ -224,6 +225,15 @@ const TimesheetFormComponent = ({
   } = useFieldArray({
     control,
     name: "timeslots",
+  });
+
+  const watchFieldsArray = watch("timeslots");
+
+  const controlledFields = timeslotFields.map((field, index) => {
+    return {
+      ...field,
+      ...watchFieldsArray[index],
+    };
   });
 
   /* Based on date prop, populate input (and subsequently load data) */
@@ -348,11 +358,11 @@ const TimesheetFormComponent = ({
 
   const formValues = getValues();
 
-  console.log("categoryData", categoryData);
-  console.log("dropdownOptions", dropdownOptions);
-  console.log("Form errors", errors);
-  console.log("Form values", formValues);
-  console.log("Timesheet data", timesheetData);
+  // console.log("categoryData", categoryData);
+  // console.log("dropdownOptions", dropdownOptions);
+  // console.log("Form errors", errors);
+  // console.log("Form values", formValues);
+  // console.log("Timesheet data", timesheetData);
 
   const onSubmitModal = (e: any) => {
     console.log("On submit modal", e);
@@ -370,24 +380,31 @@ const TimesheetFormComponent = ({
       startTime = formValues.timeslots[timeslotsLen - 1].endTime;
     }
     /* Open popup with populated values */
-    setModalValues({
-      startTime,
-      endTime: "",
-      category: "",
-      subCategory: "",
-      isProductive: false,
-      prevEndTime: null,
-      index: timeslotsLen,
-      formValues,
-    });
-    setShowModal(true);
-    // append({
+    // setModalValues({
     //   startTime,
     //   endTime: "",
     //   category: "",
     //   subCategory: "",
     //   isProductive: false,
+    //   prevEndTime: null,
+    //   index: timeslotsLen,
+    //   formValues,
     // });
+    // setShowModal(true);
+    append({
+      startTime,
+      endTime: "",
+      category: "",
+      subCategory: "",
+      isProductive: false,
+    });
+    setEditingRow({
+      startTime,
+      endTime: "",
+      category: "",
+      subCategory: "",
+      isProductive: false,
+    });
   };
 
   const onSubmit = (formData: TimesheetPayload) => {
@@ -440,12 +457,17 @@ const TimesheetFormComponent = ({
     setEditingRow(field);
   };
 
-  const handleSaveRow = (e: SyntheticEvent, field: Timeslot) => {
+  const handleSaveRow = (index: number, field: Timeslot) => {
     setEditingRow(null);
+    console.log("Save row", field, formValues);
+    // setValue(
+    //   `timeslots.${index}.isProductive`,
+    //   selectedOption.isProductive
+    // );
   };
 
   const handleCancel = (index: number, field: Timeslot) => {
-    console.log("Revert to Prev value:", editingRow);
+    console.log("Revert to Prev value:", editingRow, index);
     const fieldArr = [
       "startTime",
       "endTime",
@@ -453,9 +475,11 @@ const TimesheetFormComponent = ({
       "subCategory",
       "isProductive",
     ];
-    fieldArr.map((f) => {
-      setValue(`timeslots.${index}.${f}`, editingRow[f]);
-    });
+    setValue(`timeslots.${index}.startTime`, editingRow.startTime);
+    setValue(`timeslots.${index}.endTime`, editingRow.endTime);
+    setValue(`timeslots.${index}.category`, editingRow.category);
+    setValue(`timeslots.${index}.subCategory`, editingRow.subCategory);
+    setValue(`timeslots.${index}.isProductive`, editingRow.isProductive);
 
     setEditingRow(null);
   };
@@ -577,7 +601,6 @@ const TimesheetFormComponent = ({
                   // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
                 >
-                  {/* <DocumentCheckIcon className="h-4 w-4 hidden md:block" /> */}
                   <span className="font-normal text-sm">Save</span>
                 </button>
               </div>
@@ -585,12 +608,12 @@ const TimesheetFormComponent = ({
             </div>
             {/* Timesheet listing starts */}
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {timeslotFields.map((field, index) => (
-                <li key={field.id} className="py-3 sm:py-2">
+              {controlledFields.map((field, index) => (
+                <li key={field.id} testid={field.id} className="py-3 sm:py-2">
                   {/* Read only mode */}
                   <div
                     className={`flex items-center space-x-4 ${
-                      !editingRow || editingRow?.id === field.id ? "" : "hidden"
+                      editingRow?.id === field.id ? "hidden" : ""
                     }`}
                   >
                     <div className="w-5/12 md:w-5/12">
@@ -633,8 +656,10 @@ const TimesheetFormComponent = ({
                   {/* Editable mode */}
                   <div
                     key={field.id}
-                    className={`md:flex ${
-                      editingRow && editingRow?.id == field.id ? "" : "hidden"
+                    className={`${
+                      editingRow && editingRow?.id && editingRow?.id == field.id
+                        ? "md:flex"
+                        : "hidden"
                     } timeslot-row md:gap-x-2 mb-3`}
                   >
                     {/* Start time */}
@@ -765,7 +790,7 @@ const TimesheetFormComponent = ({
                           </span>
                         )}
                     </div>
-                    <div className="w-full md:w-2/12 mt-3 md:mt-0">
+                    <div className="w-full md:w-3/12 mt-3 md:mt-0">
                       <Controller
                         control={control}
                         name={`timeslots.${index}.category`}
@@ -819,7 +844,7 @@ const TimesheetFormComponent = ({
                           </span>
                         )}
                     </div>
-                    <div className="w-full md:w-2/12 mt-3 md:mt-0">
+                    <div className="w-full md:w-3/12 mt-3 md:mt-0">
                       <Controller
                         control={control}
                         name={`timeslots.${index}.subCategory`}
@@ -906,8 +931,37 @@ const TimesheetFormComponent = ({
                           )}
                       </span>
                     </div> */}
-                    <div className="w-full md:w-1/12 mt-3 md:mt-0">
-                      <button
+                    <div className="w-full md:w-2/12 md:flex justify-end mt-3 md:mt-0">
+                      <p className="md:flex justify-end items-center text-right font-medium text-gray-900 truncate dark:text-white">
+                        <Link
+                          href=""
+                          className="mr-2"
+                          onClick={(e) => handleSaveRow(index, field)}
+                        >
+                          <DocumentCheckIcon className="h-4 w-4" />
+                        </Link>
+                        <Link
+                          href=""
+                          onClick={(e) => handleCancel(index, field)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="none"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="4"
+                              d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                            />
+                          </svg>
+                        </Link>
+                      </p>
+                      {/* <button
                         type="button"
                         className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                         onClick={(e) => handleSaveRow(e, field)}
@@ -941,7 +995,7 @@ const TimesheetFormComponent = ({
                         <span className="md:hidden font-normal text-sm">
                           Cancel
                         </span>
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </li>
@@ -958,7 +1012,7 @@ const TimesheetFormComponent = ({
             /> */}
 
             {/* Add row, save buttons starts */}
-            {timeslotFields && timeslotFields.length > 0 && (
+            {controlledFields && controlledFields.length > 0 && (
               <div className="w-full md:w-1/2  mt-2 md:mt-0">
                 <button
                   type="button"
@@ -986,7 +1040,6 @@ const TimesheetFormComponent = ({
                   // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right ml-8 pr-3 disabled:opacity-50"
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
                 >
-                  {/* <DocumentCheckIcon className="h-4 w-4 hidden md:block" /> */}
                   <span className="font-normal text-sm">Save</span>
                 </button>
               </div>
