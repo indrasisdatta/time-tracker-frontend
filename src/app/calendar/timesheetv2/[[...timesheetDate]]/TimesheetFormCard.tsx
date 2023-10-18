@@ -215,6 +215,7 @@ const TimesheetFormComponent = ({
     setValue,
     reset,
     watch,
+    trigger,
   } = useForm<TimesheetPayload>({ defaultValues: defaultTimesheetFormData });
 
   /* In built react-hook function to add, remove rows */
@@ -379,24 +380,13 @@ const TimesheetFormComponent = ({
     if (timeslotsLen > 0) {
       startTime = formValues.timeslots[timeslotsLen - 1].endTime;
     }
-    /* Open popup with populated values */
-    // setModalValues({
-    //   startTime,
-    //   endTime: "",
-    //   category: "",
-    //   subCategory: "",
-    //   isProductive: false,
-    //   prevEndTime: null,
-    //   index: timeslotsLen,
-    //   formValues,
-    // });
-    // setShowModal(true);
     append({
       startTime,
       endTime: "",
       category: "",
       subCategory: "",
       isProductive: false,
+      isNew: true,
     });
     setEditingRow({
       startTime,
@@ -453,34 +443,67 @@ const TimesheetFormComponent = ({
     return null;
   };
 
-  const handleEditRow = (e: SyntheticEvent, field: Timeslot) => {
+  const handleEditRow = (index: number, field: Timeslot) => {
+    if (field.category) {
+      dispatchDropdownOptions({
+        type: "CATEGORY_SELECT",
+        payload: { index, catId: (field.category as ReactSelectType).value },
+      });
+    }
     setEditingRow(field);
   };
 
   const handleSaveRow = (index: number, field: Timeslot) => {
-    setEditingRow(null);
+    trigger();
+    setTimeout(() => {
+      const checkErr =
+        hasError(`timeslots.${index}.startTime`) ||
+        hasError(`timeslots.${index}.endTime`) ||
+        hasError(`timeslots.${index}.category`) ||
+        hasError(`timeslots.${index}.subCategory`);
+      if (!checkErr) {
+        setEditingRow(null);
+      }
+    }, 1000);
+
     console.log("Save row", field, formValues);
+
     // setValue(
     //   `timeslots.${index}.isProductive`,
     //   selectedOption.isProductive
     // );
   };
-
+  /* Cancel row editing, revert to previous values */
   const handleCancel = (index: number, field: Timeslot) => {
     console.log("Revert to Prev value:", editingRow, index);
-    const fieldArr = [
-      "startTime",
-      "endTime",
-      "category",
-      "subCategory",
-      "isProductive",
-    ];
-    setValue(`timeslots.${index}.startTime`, editingRow.startTime);
-    setValue(`timeslots.${index}.endTime`, editingRow.endTime);
-    setValue(`timeslots.${index}.category`, editingRow.category);
-    setValue(`timeslots.${index}.subCategory`, editingRow.subCategory);
-    setValue(`timeslots.${index}.isProductive`, editingRow.isProductive);
-
+    if (field?.isNew) {
+      remove(index);
+      // setValue(`timeslots.${index}.startTime`, "");
+      // setValue(`timeslots.${index}.endTime`, "");
+      // setValue(`timeslots.${index}.category`, "");
+      // setValue(`timeslots.${index}.subCategory`, "");
+      // setValue(`timeslots.${index}.isProductive`, false);
+      // setValue(`timeslots.${index}.isNew`, false);
+    } else {
+      setValue(
+        `timeslots.${index}.startTime`,
+        (editingRow as Timeslot).startTime
+      );
+      setValue(`timeslots.${index}.endTime`, (editingRow as Timeslot).endTime);
+      setValue(
+        `timeslots.${index}.category`,
+        (editingRow as Timeslot).category
+      );
+      setValue(
+        `timeslots.${index}.subCategory`,
+        (editingRow as Timeslot).subCategory
+      );
+      setValue(
+        `timeslots.${index}.isProductive`,
+        (editingRow as Timeslot).isProductive
+      );
+      setValue(`timeslots.${index}.isNew`, false);
+    }
     setEditingRow(null);
   };
 
@@ -609,11 +632,17 @@ const TimesheetFormComponent = ({
             {/* Timesheet listing starts */}
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {controlledFields.map((field, index) => (
-                <li key={field.id} testid={field.id} className="py-3 sm:py-2">
+                <li
+                  key={field.id}
+                  data-testid={`li-${field.id}`}
+                  className="py-3 sm:py-2"
+                >
                   {/* Read only mode */}
                   <div
                     className={`flex items-center space-x-4 ${
-                      editingRow?.id === field.id ? "hidden" : ""
+                      field?.isNew || editingRow?.id === field.id
+                        ? "hidden"
+                        : ""
                     }`}
                   >
                     <div className="w-5/12 md:w-5/12">
@@ -642,7 +671,7 @@ const TimesheetFormComponent = ({
                           href=""
                           className="mr-2"
                           onClick={(e) => {
-                            handleEditRow(e, field);
+                            handleEditRow(index, field);
                           }}
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -653,11 +682,43 @@ const TimesheetFormComponent = ({
                       </p>
                     </div>
                   </div>
+
+                  {/* <div className={`flex items-center space-x-4`}>
+                    <div className="w-5/12 md:w-5/12">
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.category && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.category?.message}
+                          </span>
+                        )}
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.subCategory && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.subCategory?.message}
+                          </span>
+                        )}
+                    </div>
+                    <div className="w-5/12 md:w-5/12">
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.startTime && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.startTime?.message}
+                          </span>
+                        )}
+                      {errors?.timeslots &&
+                        errors?.timeslots[index]?.endTime && (
+                          <span className="inline-flex text-sm text-red-700">
+                            {errors?.timeslots[index]?.endTime?.message}
+                          </span>
+                        )}
+                    </div>
+                    <div className="w-2/12 md:w-2/12"></div>
+                  </div> */}
                   {/* Editable mode */}
                   <div
                     key={field.id}
                     className={`${
-                      editingRow && editingRow?.id && editingRow?.id == field.id
+                      editingRow && (field?.isNew || editingRow?.id == field.id)
                         ? "md:flex"
                         : "hidden"
                     } timeslot-row md:gap-x-2 mb-3`}
@@ -961,41 +1022,6 @@ const TimesheetFormComponent = ({
                           </svg>
                         </Link>
                       </p>
-                      {/* <button
-                        type="button"
-                        className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
-                        onClick={(e) => handleSaveRow(e, field)}
-                      >
-                        <DocumentCheckIcon className="h-4 w-4 hidden md:block" />
-                        <span className="md:hidden font-normal text-sm">
-                          Save
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-md bg-red-500 hover:bg-red-700 px-2.5 py-2 text-sm text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 md:w-auto md:d-flex justify-content-right"
-                        onClick={(e) => handleCancel(index, field)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
-                          />
-                        </svg>
-
-                        <span className="md:hidden font-normal text-sm">
-                          Cancel
-                        </span>
-                      </button> */}
                     </div>
                   </div>
                 </li>

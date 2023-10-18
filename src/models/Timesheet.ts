@@ -13,6 +13,7 @@ export interface Timeslot {
   subCategory: string | ReactSelectType | SubCategory;
   isProductive?: boolean;
   comments?: string;
+  isNew?: boolean;
 }
 export type TimesheetPayload = {
   timesheetDate: string;
