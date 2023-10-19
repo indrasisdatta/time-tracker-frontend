@@ -374,27 +374,45 @@ const TimesheetFormComponent = ({
   };
 
   const addRow = () => {
-    /* Next row start time should match prev row end time */
+    trigger();
     const timeslotsLen = formValues.timeslots.length;
-    let startTime = "";
-    if (timeslotsLen > 0) {
-      startTime = formValues.timeslots[timeslotsLen - 1].endTime;
-    }
-    append({
-      startTime,
-      endTime: "",
-      category: "",
-      subCategory: "",
-      isProductive: false,
-      isNew: true,
-    });
-    setEditingRow({
-      startTime,
-      endTime: "",
-      category: "",
-      subCategory: "",
-      isProductive: false,
-    });
+    const index = timeslotsLen ? timeslotsLen - 1 : 0;
+    setTimeout(() => {
+      const checkErr =
+        hasError(`timeslots.${index}.startTime`) ||
+        hasError(`timeslots.${index}.endTime`) ||
+        hasError(`timeslots.${index}.category`) ||
+        hasError(`timeslots.${index}.subCategory`);
+
+      if (!checkErr) {
+        /* Previously added row should be non-editable */
+        // console.log("controlledFields", controlledFields);
+        console.log(`timeslots.${index}.isNew`, controlledFields);
+        if (index > 0) {
+          setValue(`timeslots.${index}.isNew`, false);
+        }
+        /* Next row start time should match prev row end time */
+        let startTime = "";
+        if (timeslotsLen > 0) {
+          startTime = formValues.timeslots[timeslotsLen - 1].endTime;
+        }
+        append({
+          startTime,
+          endTime: "",
+          category: "",
+          subCategory: "",
+          isProductive: false,
+          isNew: true,
+        });
+        setEditingRow({
+          startTime,
+          endTime: "",
+          category: "",
+          subCategory: "",
+          isProductive: false,
+        });
+      }
+    }, 100);
   };
 
   const onSubmit = (formData: TimesheetPayload) => {
@@ -407,6 +425,7 @@ const TimesheetFormComponent = ({
         typeof row.subCategory === "object"
           ? (row.subCategory as ReactSelectType)?.value
           : "";
+      delete row.isNew;
       // row.comments = null;
     });
     console.log("Payload: ", payload);
@@ -461,17 +480,12 @@ const TimesheetFormComponent = ({
         hasError(`timeslots.${index}.endTime`) ||
         hasError(`timeslots.${index}.category`) ||
         hasError(`timeslots.${index}.subCategory`);
+
       if (!checkErr) {
         setEditingRow(null);
       }
-    }, 1000);
-
+    }, 100);
     console.log("Save row", field, formValues);
-
-    // setValue(
-    //   `timeslots.${index}.isProductive`,
-    //   selectedOption.isProductive
-    // );
   };
   /* Cancel row editing, revert to previous values */
   const handleCancel = (index: number, field: Timeslot) => {
@@ -636,6 +650,7 @@ const TimesheetFormComponent = ({
                   key={field.id}
                   data-testid={`li-${field.id}`}
                   className="py-3 sm:py-2"
+                  data-isnew={field?.isNew}
                 >
                   {/* Read only mode */}
                   <div
@@ -683,37 +698,6 @@ const TimesheetFormComponent = ({
                     </div>
                   </div>
 
-                  {/* <div className={`flex items-center space-x-4`}>
-                    <div className="w-5/12 md:w-5/12">
-                      {errors?.timeslots &&
-                        errors?.timeslots[index]?.category && (
-                          <span className="inline-flex text-sm text-red-700">
-                            {errors?.timeslots[index]?.category?.message}
-                          </span>
-                        )}
-                      {errors?.timeslots &&
-                        errors?.timeslots[index]?.subCategory && (
-                          <span className="inline-flex text-sm text-red-700">
-                            {errors?.timeslots[index]?.subCategory?.message}
-                          </span>
-                        )}
-                    </div>
-                    <div className="w-5/12 md:w-5/12">
-                      {errors?.timeslots &&
-                        errors?.timeslots[index]?.startTime && (
-                          <span className="inline-flex text-sm text-red-700">
-                            {errors?.timeslots[index]?.startTime?.message}
-                          </span>
-                        )}
-                      {errors?.timeslots &&
-                        errors?.timeslots[index]?.endTime && (
-                          <span className="inline-flex text-sm text-red-700">
-                            {errors?.timeslots[index]?.endTime?.message}
-                          </span>
-                        )}
-                    </div>
-                    <div className="w-2/12 md:w-2/12"></div>
-                  </div> */}
                   {/* Editable mode */}
                   <div
                     key={field.id}
