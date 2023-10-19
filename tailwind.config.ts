@@ -7,6 +7,7 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
     "./node_modules/react-tailwindcss-select/dist/index.esm.js",
+    "./node_modules/tw-elements/dist/js/**/*.js",
   ],
   darkMode: "class",
   theme: {
@@ -30,6 +31,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tw-elements/dist/plugin.cjs")],
 };
 export default config;

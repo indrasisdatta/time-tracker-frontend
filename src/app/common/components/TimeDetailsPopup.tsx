@@ -10,6 +10,8 @@ import {
   ChevronDoubleRightIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
+import { Loader } from "./Loader";
+import { redirect, useRouter } from "next/navigation";
 
 export const TimeDetailsPopup = ({
   title,
@@ -24,6 +26,8 @@ export const TimeDetailsPopup = ({
   showModal: boolean;
   onCloseModal: any;
 }) => {
+  const router = useRouter();
+
   const fetchCalendarSummary = async ({
     queryKey,
   }: {
@@ -68,6 +72,9 @@ export const TimeDetailsPopup = ({
   /* Summary HTML */
   const showSummaryHtml = () => {
     console.log("Summary html data", summaryData?.data);
+    if (isLoading) {
+      return <Loader className="m-auto my-4 flex" />;
+    }
     return (
       <div className="text-slate-500 dark:text-white leading-relaxed">
         {summaryData?.data?.map((calData: any) => (
@@ -113,6 +120,16 @@ export const TimeDetailsPopup = ({
                 )}
                 {/*footer*/}
                 <div className="flex items-center justify-end py-3 px-1 border-t border-solid border-slate-200 rounded-b">
+                  <PrimaryButton
+                    className="mr-3"
+                    type="button"
+                    text="Report"
+                    onClick={() => {
+                      console.log("Open report");
+                      // return redirect(`/report/`);
+                      router.push(`/reports`);
+                    }}
+                  />
                   <SecondaryButton
                     type="button"
                     text="Close"

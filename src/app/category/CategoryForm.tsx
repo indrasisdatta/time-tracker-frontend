@@ -55,39 +55,37 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   };
 
   /* useMutation hook from react-query is called to handle API call and maintain different states (error, data, loading etc)  */
-  const { mutate, data, error, isError, isLoading } = useMutation(saveCategory);
+  const { mutate, data, error, isError, isLoading } = useMutation(
+    saveCategory,
+    {
+      onSuccess: () => {
+        const op = !!category && category?._id ? "update" : "add";
+        router.push(`/category?op=${op}`);
+      },
+      onError: (error) => {
+        toast.error(
+          `Error: ${(error as any).response?.data?.error.join(", ")}`,
+          {
+            duration: 5000,
+            style: {
+              maxWidth: "30em",
+            },
+          }
+        );
+      },
+    }
+  );
 
   const router = useRouter();
 
   console.log("Mutation result", data, error);
 
-  /* Based on form submit API response, show error toast or redirect to category URL */
-  if (isError) {
-    toast.error(`Error: ${(error as any).response?.data?.error.join(", ")}`, {
-      duration: 5000,
-      style: {
-        maxWidth: "30em",
-      },
-    });
-  } else if (data) {
-    // toast.success("Category saved successful");
-    // redirect("/category");
-    const op = !!category && category?._id ? "update" : "add";
-    router.push(`/category?op=${op}`);
-    setTimeout(() => {
-      toast.success("Category saved", {
-        position: "top-right",
-        // autoClose: 5000,
-      });
-    }, 1);
-  }
-
   /**
    * Needed for multiple inputs of Subcategories
    * Provides in built functions:
-   *  append for adding rows, remove for deleting rows
+   *  prepend for adding rows, remove for deleting rows
    */
-  const { fields, append, remove } = useFieldArray({
+  const { fields, prepend, remove } = useFieldArray({
     control,
     name: "subCategories",
   });
@@ -229,8 +227,18 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
         <div className="md:flex mb-4">
           <div className="w-full md:w-9/12">
-            <label className={`block text-sm font-medium leading-6`}>
-              Sub categories
+            <label
+              className={`md:flex justify-between text-sm font-medium leading-6`}
+            >
+              <span className="md:flex items-center">Sub categories</span>
+              <button
+                type="button"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-2 rounded w-full md:w-auto md:d-flex justify-content-right"
+                onClick={() => prepend({ name: "", description: "" })}
+                data-testid={`add-btn`}
+              >
+                <span className="font-normal text-sm">Add more</span>
+              </button>
             </label>
             {fields.map((field, index) => (
               <div key={field.id} className="mt-3 md:flex gap-4">
@@ -289,18 +297,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                   </label>
                 </div>
                 <div className="w-full md:w-1/12 mt-2 md:mt-0 md:text-right">
-                  {index === 0 && (
-                    <button
-                      type="button"
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-2 rounded w-full md:w-auto md:d-flex justify-content-right"
-                      onClick={() => append({ name: "", description: "" })}
-                      data-testid={`add-btn-${index}`}
-                    >
-                      <PlusIcon className="h-4 w-4 hidden md:block" />
-                      <span className="md:hidden font-normal text-sm">Add</span>
-                    </button>
-                  )}
-                  {index > 0 && (
+                  {index < fields.length - 1 && (
                     <button
                       type="button"
                       className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded  w-full md:w-auto md:d-flex justify-content-right"
@@ -323,7 +320,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           <button
             disabled={isLoading}
             type="submit"
-            className="rounded-md block bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="w-full md:w-auto rounded-md block bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Save
           </button>
