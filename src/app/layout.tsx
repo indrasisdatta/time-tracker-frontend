@@ -28,7 +28,7 @@ export default function RootLayout({
         <ThemeWrapper>
           <Header />
           <Suspense fallback={<PageLoader />}>
-            <div className="container mx-auto p-8">{children}</div>
+            <div className="container mx-auto md:p-8 my-8">{children}</div>
           </Suspense>
         </ThemeWrapper>
       </body>
