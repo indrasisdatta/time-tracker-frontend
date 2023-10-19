@@ -47,12 +47,20 @@ export const Header = () => {
       : "text-indigo-700 dark:text-teal-100 dark:hover:text-white";
   };
 
+  const closeMobileMenu = () => {
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 500);
+  };
+
   return (
     <>
       <header className="border-b-[1px] border-gray-300">
         <nav className="flex items-center justify-between flex-wrap py-3 px-8">
           <div className="flex items-center flex-shrink-0  text-indigo-700 dark:text-teal-100 dark:hover:text-white mr-6 lg:mr-72">
-            <Link href="/">Timesheet App</Link>
+            <Link href="/" onClick={closeMobileMenu}>
+              Timesheet App
+            </Link>
           </div>
           {/* Mobile display */}
           <div className="block lg:hidden">
@@ -88,6 +96,7 @@ export const Header = () => {
             <div className="text-sm lg:flex-grow">
               <Link
                 href="/category"
+                onClick={closeMobileMenu}
                 className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
                   "/category"
                 )}`}
@@ -96,7 +105,6 @@ export const Header = () => {
               </Link>
               <div className="md:inline" ref={calDropdown}>
                 <Link
-                  // href="/calendar"
                   href=""
                   id="dropdownCalButton"
                   onClick={() => setShowCalMenu((prevState) => !prevState)}
@@ -120,6 +128,7 @@ export const Header = () => {
                     <li>
                       <Link
                         href="/calendar"
+                        onClick={closeMobileMenu}
                         className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white submenu-link"
                       >
                         View Calendar
@@ -128,6 +137,7 @@ export const Header = () => {
                     <li>
                       <Link
                         href="/calendar/timesheet"
+                        onClick={closeMobileMenu}
                         className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white submenu-link"
                       >
                         Timesheet entry
@@ -138,6 +148,7 @@ export const Header = () => {
               </div>
               <Link
                 href="/reports"
+                onClick={closeMobileMenu}
                 className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
                   "/reports"
                 )}`}
