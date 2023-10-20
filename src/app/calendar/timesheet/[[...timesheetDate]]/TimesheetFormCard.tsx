@@ -396,14 +396,17 @@ const TimesheetFormComponent = ({
         if (timeslotsLen > 0) {
           startTime = formValues.timeslots[timeslotsLen - 1].endTime;
         }
-        append({
-          startTime,
-          endTime: "",
-          category: "",
-          subCategory: "",
-          isProductive: false,
-          isNew: true,
-        });
+        append(
+          {
+            startTime,
+            endTime: "",
+            category: "",
+            subCategory: "",
+            isProductive: false,
+            isNew: true,
+          },
+          { shouldFocus: false }
+        );
         setEditingRow({
           startTime,
           endTime: "",
