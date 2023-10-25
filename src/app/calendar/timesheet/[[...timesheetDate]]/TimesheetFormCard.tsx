@@ -634,6 +634,7 @@ const TimesheetFormComponent = ({
                 <button
                   type="submit"
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     formValues.timeslots.length == 0 ||
                     isLoadingSave
@@ -1046,6 +1047,7 @@ const TimesheetFormComponent = ({
                 <button
                   type="submit"
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     formValues.timeslots.length == 0 ||
                     isLoadingSave
