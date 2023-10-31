@@ -396,14 +396,17 @@ const TimesheetFormComponent = ({
         if (timeslotsLen > 0) {
           startTime = formValues.timeslots[timeslotsLen - 1].endTime;
         }
-        append({
-          startTime,
-          endTime: "",
-          category: "",
-          subCategory: "",
-          isProductive: false,
-          isNew: true,
-        });
+        append(
+          {
+            startTime,
+            endTime: "",
+            category: "",
+            subCategory: "",
+            isProductive: false,
+            isNew: true,
+          },
+          { shouldFocus: false }
+        );
         setEditingRow({
           startTime,
           endTime: "",
@@ -482,10 +485,11 @@ const TimesheetFormComponent = ({
         hasError(`timeslots.${index}.subCategory`);
 
       if (!checkErr) {
+        setValue(`timeslots.${index}.isNew`, false);
         setEditingRow(null);
       }
     }, 100);
-    console.log("Save row", field, formValues);
+    // console.log("Save row", field, formValues);
   };
   /* Cancel row editing, revert to previous values */
   const handleCancel = (index: number, field: Timeslot) => {
@@ -618,6 +622,7 @@ const TimesheetFormComponent = ({
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     isErrorCat ||
                     isErrorTimesheetData ||
@@ -631,6 +636,7 @@ const TimesheetFormComponent = ({
                 <button
                   type="submit"
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     formValues.timeslots.length == 0 ||
                     isLoadingSave
@@ -1030,6 +1036,7 @@ const TimesheetFormComponent = ({
                   className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     isErrorCat ||
                     isErrorTimesheetData ||
@@ -1043,6 +1050,7 @@ const TimesheetFormComponent = ({
                 <button
                   type="submit"
                   disabled={
+                    (!!editingRow && Object.keys(editingRow).length > 0) ||
                     !timesheetDate?.startDate ||
                     formValues.timeslots.length == 0 ||
                     isLoadingSave
