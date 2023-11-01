@@ -1,8 +1,8 @@
 import { Loader } from "@/app/common/components/Loader";
 import { Category, CategoryAddFormValues } from "@/models/Category";
 import { addCategory, updateCategory } from "@/services/CategoryService";
-import { PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
-import { redirect, useRouter } from "next/navigation";
+import { TrashIcon } from "@heroicons/react/20/solid";
+import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Toaster, toast } from "react-hot-toast";

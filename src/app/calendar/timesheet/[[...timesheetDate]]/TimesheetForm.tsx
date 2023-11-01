@@ -16,12 +16,7 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import Select from "react-tailwindcss-select";
 import { getCategories } from "@/services/CategoryService";
-import {
-  QueryFunctionContext,
-  QueryKey,
-  useMutation,
-  useQuery,
-} from "react-query";
+import { QueryKey, useMutation, useQuery } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
 import {
   ReactSelectType,
@@ -32,8 +27,6 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { calculateTimeDifference, summaryTime } from "@/utils/helper";
 import { Loader } from "@/app/common/components/Loader";
-import { useRouter } from "next/router";
-import { redirect } from "next/navigation";
 import {
   getTimesheetDatewise,
   saveTimesheet,

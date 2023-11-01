@@ -155,6 +155,24 @@ export const Header = () => {
               >
                 Reports
               </Link>
+              <Link
+                href="/auth/login"
+                onClick={closeMobileMenu}
+                className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                  "/auth/login"
+                )}`}
+              >
+                Login
+              </Link>
+              <Link
+                href="/auth/signup"
+                onClick={closeMobileMenu}
+                className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                  "/auth/signup"
+                )}`}
+              >
+                Sign up
+              </Link>
             </div>
             <div className="mt-3 md:mt-0 text-center lg:inline-flex items-center">
               <ThemeSwitch />
