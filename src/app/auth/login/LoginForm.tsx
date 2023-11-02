@@ -1,10 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Loader } from "@/app/common/components/Loader";
+import { AuthContext } from "@/context/AuthContext";
 import { LoginFormValues } from "@/models/User";
 import { userLogin } from "@/services/UserService";
+import { LoggedinUserData } from "@/utils/auth";
 import { emailValidateRegex } from "@/utils/helper";
 import Link from "next/link";
-import React from "react";
+import { redirect, useRouter } from "next/navigation";
+import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { useMutation } from "react-query";
@@ -21,6 +24,9 @@ const toastOptions = {
 };
 
 export const LoginForm = () => {
+  const router = useRouter();
+  const useAuth = useContext(AuthContext);
+
   /* React hook form initialize */
   const {
     register,
@@ -44,11 +50,13 @@ export const LoginForm = () => {
     isError,
     error,
   } = useMutation(userLoginAPI, {
-    onSuccess: (data) => {
-      console.log("Login API Success", data);
-      if (data.status == 1) {
+    onSuccess: (userResp) => {
+      console.log("Login API Success", userResp);
+      if (userResp.status == 1) {
         toast.success(`You've logged in successfully`, toastOptions);
-        // Set data.accessToken, data.refreshToken in localStorage
+        LoggedinUserData.set(userResp.data);
+        useAuth.setLoggedinUser(userResp.data);
+        router.push("/user/profile");
       } else {
         toast.error(
           loginResponse?.error || "Something went wrong",

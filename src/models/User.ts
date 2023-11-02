@@ -18,3 +18,8 @@ export type SignupFormValues = {
   password: string;
   confirmPassword: string;
 };
+
+export type LoggedinUser = {
+  accessToken: string;
+  refreshToken: string;
+} | null;

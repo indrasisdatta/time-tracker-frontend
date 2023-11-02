@@ -9,6 +9,7 @@ import { ThemeWrapper } from "./ThemeWrapper";
 import { Suspense } from "react";
 import { Loader } from "./common/components/Loader";
 import { PageLoader } from "./common/components/PageLoader";
+import { AuthContextProvider } from "../context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,12 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeWrapper>
-          <Header />
-          <Suspense fallback={<PageLoader />}>
-            <div className="container mx-auto md:p-8 my-8">{children}</div>
-          </Suspense>
-        </ThemeWrapper>
+        <AuthContextProvider>
+          <ThemeWrapper>
+            <Header />
+            <Suspense fallback={<PageLoader />}>
+              <div className="container mx-auto md:p-8 my-8">{children}</div>
+            </Suspense>
+          </ThemeWrapper>
+        </AuthContextProvider>
       </body>
     </html>
   );
