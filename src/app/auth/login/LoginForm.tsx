@@ -3,7 +3,7 @@ import { Loader } from "@/app/common/components/Loader";
 import { AuthContext } from "@/context/AuthContext";
 import { LoginFormValues } from "@/models/User";
 import { userLogin } from "@/services/UserService";
-import { LoggedinUserData } from "@/utils/auth";
+import { setLoggedinUserData } from "@/utils/auth";
 import { emailValidateRegex } from "@/utils/helper";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
@@ -54,7 +54,7 @@ export const LoginForm = () => {
       console.log("Login API Success", userResp);
       if (userResp.status == 1) {
         toast.success(`You've logged in successfully`, toastOptions);
-        LoggedinUserData.set(userResp.data);
+        setLoggedinUserData(userResp.data);
         useAuth.setLoggedinUser(userResp.data);
         router.push("/user/profile");
       } else {

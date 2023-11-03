@@ -7,8 +7,10 @@ import { useState, useRef, useEffect } from "react";
 import { redirect, usePathname } from "next/navigation";
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { isServer } from "@/utils/helper";
-import { LoggedinUserData } from "@/utils/auth";
+// import { LoggedinUserData } from "@/utils/auth";
 import { useRouter } from "next/navigation";
+import { deleteLoggedinUserData, getLoggedinUserData } from "@/utils/auth";
+import { useAuth } from "../hooks/useAuth";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +21,17 @@ export const Header = () => {
   const calDropdown = useRef<HTMLInputElement>(null);
 
   const pathName = usePathname();
+
+  const { loggedinUser, setLoggedinUser } = useAuth();
+
+  console.log("Header logged in user", loggedinUser);
+
+  const userLogout = () => {
+    deleteLoggedinUserData();
+    setLoggedinUser(null);
+    console.log("Calling setLoggedinUser");
+    router.push(`/auth/login`);
+  };
 
   /* Add, remove event listener for calendar dropdown display */
   useEffect(() => {
@@ -54,13 +67,6 @@ export const Header = () => {
     setTimeout(() => {
       setIsOpen(false);
     }, 500);
-  };
-
-  const userLogout = () => {
-    LoggedinUserData.clear();
-    window.location.href = `/auth/login`;
-    // return redirect(`/auth/login`);
-    // router.push(`/auth/login`);
   };
 
   return (
@@ -115,7 +121,7 @@ export const Header = () => {
               </Link>
               <div className="md:inline" ref={calDropdown}>
                 <Link
-                  href=""
+                  href="#/"
                   id="dropdownCalButton"
                   onClick={() => setShowCalMenu((prevState) => !prevState)}
                   className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
@@ -165,7 +171,7 @@ export const Header = () => {
               >
                 Reports
               </Link>
-              {!LoggedinUserData.get() && (
+              {!loggedinUser && (
                 <>
                   <Link
                     href="/auth/login"
@@ -187,9 +193,9 @@ export const Header = () => {
                   </Link>
                 </>
               )}
-              {LoggedinUserData.get() && (
+              {loggedinUser && (
                 <Link
-                  href=""
+                  href="/auth/login"
                   onClick={userLogout}
                   className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 text-indigo-700 dark:text-teal-100 dark:hover:text-white`}
                 >

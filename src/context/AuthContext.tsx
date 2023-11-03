@@ -1,6 +1,6 @@
 "use client";
 import { LoggedinUser } from "@/models/User";
-import { LoggedinUserData } from "@/utils/auth";
+import { getLoggedinUserData } from "@/utils/auth";
 import React, {
   Dispatch,
   SetStateAction,
@@ -8,12 +8,18 @@ import React, {
   createContext,
 } from "react";
 
+/**
+ * TODO: loggedinUser should use Cookie data
+ * !Check promise type, sot hat function returns user cookie data correctly
+ */
+
 export const AuthContext = createContext<{
-  loggedinUser: LoggedinUser;
-  setLoggedinUser: Dispatch<SetStateAction<LoggedinUser>>;
+  loggedinUser: Promise<LoggedinUser>;
+  setLoggedinUser: Dispatch<SetStateAction<Promise<LoggedinUser>>>;
 }>({
-  loggedinUser: LoggedinUserData.get() || null,
-  setLoggedinUser: () => null,
+  // loggedinUser: getLoggedinUserData() || null,
+  loggedinUser: Promise.resolve(null),
+  setLoggedinUser: () => Promise.resolve(null),
 });
 
 export const AuthContextProvider = ({
@@ -21,9 +27,14 @@ export const AuthContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [loggedinUser, setLoggedinUser] = useState<LoggedinUser>(
-    LoggedinUserData.get() || null
-  );
+  // LoggedinUser
+  const [loggedinUser, setLoggedinUser] = useState(async () => {
+    const loggedin = await getLoggedinUserData();
+    console.log("Get loggedin cookie", loggedin);
+    return loggedin || null;
+  });
+
+  console.log("Context loggedinUser", loggedinUser);
 
   return (
     <AuthContext.Provider value={{ loggedinUser, setLoggedinUser }}>
