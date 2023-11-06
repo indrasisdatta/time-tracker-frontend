@@ -17,8 +17,7 @@ export const AuthContext = createContext<{
   loggedinUser: Promise<LoggedinUser>;
   setLoggedinUser: Dispatch<SetStateAction<Promise<LoggedinUser>>>;
 }>({
-  // loggedinUser: getLoggedinUserData() || null,
-  loggedinUser: Promise.resolve(null),
+  loggedinUser: getLoggedinUserData() || null,
   setLoggedinUser: () => Promise.resolve(null),
 });
 
@@ -30,7 +29,7 @@ export const AuthContextProvider = ({
   // LoggedinUser
   const [loggedinUser, setLoggedinUser] = useState(async () => {
     const loggedin = await getLoggedinUserData();
-    console.log("Get loggedin cookie", loggedin);
+    // console.log("Get loggedin cookie", loggedin);
     return loggedin || null;
   });
 

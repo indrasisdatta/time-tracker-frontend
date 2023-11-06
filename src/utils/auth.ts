@@ -30,8 +30,9 @@ export const setLoggedinUserData = async (userObj: LoggedinUser) => {
 };
 
 export const getLoggedinUserData = async () => {
-  if (cookies().get(USER_LS_KEY)) {
-    return JSON.parse(cookies().get(USER_LS_KEY) as string);
+  console.log(`Reading cookie ${USER_LS_KEY}`, cookies().get(USER_LS_KEY));
+  if (cookies().has(USER_LS_KEY)) {
+    return JSON.parse(cookies().get(USER_LS_KEY)!.value);
   }
   return null;
 };

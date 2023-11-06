@@ -11,6 +11,7 @@ import { isServer } from "@/utils/helper";
 import { useRouter } from "next/navigation";
 import { deleteLoggedinUserData, getLoggedinUserData } from "@/utils/auth";
 import { useAuth } from "../hooks/useAuth";
+import { LoggedinUser } from "@/models/User";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +29,7 @@ export const Header = () => {
 
   const userLogout = () => {
     deleteLoggedinUserData();
-    setLoggedinUser(null);
+    setLoggedinUser(null as unknown as Promise<LoggedinUser>);
     console.log("Calling setLoggedinUser");
     router.push(`/auth/login`);
   };
