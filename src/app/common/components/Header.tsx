@@ -4,18 +4,35 @@ import Link from "next/link";
 import "../../globals.css";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { isServer } from "@/utils/helper";
+// import { LoggedinUserData } from "@/utils/auth";
+import { useRouter } from "next/navigation";
+import { deleteLoggedinUserData, getLoggedinUserData } from "@/utils/auth";
+import { useAuth } from "../hooks/useAuth";
+import { LoggedinUser } from "@/models/User";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalMenu, setShowCalMenu] = useState(false);
+  const router = useRouter();
 
   /* Ref for calendar dropdown element */
   const calDropdown = useRef<HTMLInputElement>(null);
 
   const pathName = usePathname();
+
+  const { loggedinUser, setLoggedinUser } = useAuth();
+
+  console.log("Header logged in user", loggedinUser);
+
+  const userLogout = () => {
+    deleteLoggedinUserData();
+    setLoggedinUser(null as unknown as Promise<LoggedinUser>);
+    console.log("Calling setLoggedinUser");
+    router.push(`/auth/login`);
+  };
 
   /* Add, remove event listener for calendar dropdown display */
   useEffect(() => {
@@ -105,7 +122,7 @@ export const Header = () => {
               </Link>
               <div className="md:inline" ref={calDropdown}>
                 <Link
-                  href=""
+                  href="#/"
                   id="dropdownCalButton"
                   onClick={() => setShowCalMenu((prevState) => !prevState)}
                   className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
@@ -155,6 +172,37 @@ export const Header = () => {
               >
                 Reports
               </Link>
+              {!loggedinUser && (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={closeMobileMenu}
+                    className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                      "/auth/login"
+                    )}`}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    onClick={closeMobileMenu}
+                    className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 ${activeLinkClass(
+                      "/auth/signup"
+                    )}`}
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+              {loggedinUser && (
+                <Link
+                  href="/auth/login"
+                  onClick={userLogout}
+                  className={`block mt-2 text-lg md:text-sm md:mt-4 lg:inline-block lg:mt-0 mr-4 text-indigo-700 dark:text-teal-100 dark:hover:text-white`}
+                >
+                  Logout
+                </Link>
+              )}
             </div>
             <div className="mt-3 md:mt-0 text-center lg:inline-flex items-center">
               <ThemeSwitch />
