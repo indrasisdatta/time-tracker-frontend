@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
+import { ForgotPasswordPopup } from "@/app/common/components/ForgotPasswordPopup";
 import { Loader } from "@/app/common/components/Loader";
 import { useFormInitialize } from "@/app/common/hooks/useFormInitialize";
 import { AuthContext } from "@/context/AuthContext";
@@ -8,7 +9,7 @@ import { setLoggedinUserData } from "@/utils/auth";
 import { emailValidateRegex } from "@/utils/helper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useMutation } from "react-query";
 
@@ -24,10 +25,30 @@ const toastOptions = {
 };
 
 export const LoginForm = () => {
+  const [showForgotPwdPopup, setShowForgotPwdPopup] = useState<boolean>(false);
+  const [forgotPwdEmail, setForgotPwdEmail] = useState<string>("");
+
   const router = useRouter();
   const useAuth = useContext(AuthContext);
-  const { register, handleSubmit, errors, reset, hasError, getInputClass } =
-    useFormInitialize<LoginFormValues>(defaultValues);
+  const {
+    register,
+    handleSubmit,
+    errors,
+    reset,
+    hasError,
+    getInputClass,
+    getValues,
+  } = useFormInitialize<LoginFormValues>(defaultValues);
+
+  const onCloseModal = () => {
+    setShowForgotPwdPopup(false);
+  };
+
+  const onOpenForgotPwdModal = () => {
+    const { email } = getValues();
+    setShowForgotPwdPopup(true);
+    setForgotPwdEmail(email);
+  };
 
   /* Form submit API call */
   const userLoginAPI = async (formData: LoginFormValues) => {
@@ -53,10 +74,7 @@ export const LoginForm = () => {
           router.push("/user/profile");
         }, 1000);
       } else {
-        toast.error(
-          loginResponse?.error || "Something went wrong",
-          toastOptions
-        );
+        toast.error(userResp?.error || "Something went wrong", toastOptions);
       }
     },
     onError: (error) => {
@@ -147,14 +165,23 @@ export const LoginForm = () => {
               </span>
             )}
           </div>
+          <div className="flex justify-between items-center">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
+            >
+              Sign in
+            </button>
+            <Link
+              onClick={onOpenForgotPwdModal}
+              href="#/"
+              className="text-sm text-primary-600 hover:underline dark:text-primary-500"
+            >
+              Forgot password
+            </Link>
+          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
-          >
-            Sign in
-          </button>
           <p className="text-sm font-light text-gray-500 dark:text-gray-400">
             Don't have an account yet?{" "}
             <Link
@@ -166,6 +193,14 @@ export const LoginForm = () => {
           </p>
         </form>
       </div>
+
+      <ForgotPasswordPopup
+        title={"Forgot Password"}
+        email={forgotPwdEmail}
+        showForgotPwdPopup={showForgotPwdPopup}
+        setShowForgotPwdPopup={setShowForgotPwdPopup}
+        onCloseModal={onCloseModal}
+      />
     </div>
   );
 };
