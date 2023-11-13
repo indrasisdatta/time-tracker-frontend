@@ -24,3 +24,10 @@ export type LoggedinUser = {
   accessToken: string;
   refreshToken: string;
 } | null;
+
+export type ResetPwdFormValues = {
+  email?: string;
+  resetToken: string;
+  password: string;
+  confirmPassword: string;
+};
