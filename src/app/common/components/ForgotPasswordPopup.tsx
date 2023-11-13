@@ -1,10 +1,8 @@
 import React, {
-  Dispatch,
-  SetStateAction,
+  // Dispatch,
+  // SetStateAction,
   memo,
-  useCallback,
   useEffect,
-  useState,
 } from "react";
 import { SecondaryButton } from "./buttons/Secondarybutton";
 import { PrimaryButton } from "./buttons/PrimaryButton";
@@ -13,6 +11,7 @@ import { useFormInitialize } from "../hooks/useFormInitialize";
 import { emailValidateRegex } from "@/utils/helper";
 import { useMutation } from "react-query";
 import toast from "react-hot-toast";
+import { forgotPwdRequest } from "@/services/UserService";
 
 const toastOptions = {
   duration: 5000,
@@ -25,16 +24,16 @@ const ForgotPassword = ({
   title,
   email,
   showForgotPwdPopup,
-  setShowForgotPwdPopup,
+  // setShowForgotPwdPopup,
   onCloseModal,
 }: {
   title: string;
   email: string;
   showForgotPwdPopup: boolean;
-  setShowForgotPwdPopup: Dispatch<SetStateAction<boolean>>;
+  // setShowForgotPwdPopup: Dispatch<SetStateAction<boolean>>;
   onCloseModal: Function;
 }) => {
-  const { register, handleSubmit, errors, reset, hasError } =
+  const { register, handleSubmit, errors, reset, hasError, getValues } =
     useFormInitialize<{ email: string }>({ email: "" });
 
   /**
@@ -57,38 +56,37 @@ const ForgotPassword = ({
     email: string;
   }): Promise<any> => {
     console.log("Forgot pwd api call...");
-    const { data } = await forgotPwdRequestApi(formData);
+    const { data } = await forgotPwdRequest(formData);
     return data;
   };
 
-  const { mutate: forgotPwdMutate, isLoading } = useMutation(
-    forgotPwdRequestApi,
-    {
-      onSuccess: (userResp: { status: number; data: any; error: any }) => {
-        if (userResp.status == 1) {
-          reset({ email: "" });
-          toast.success(
-            "Password reset email has been sent to your email address",
-            toastOptions
-          );
-          setShowForgotPwdPopup(false);
-        } else {
-          toast.error(userResp?.error || "Something went wrong", toastOptions);
-        }
-      },
-      onError: (error) => {
-        console.log("Forgot pwd API Error", error);
-        toast.error(
-          `Error: ${
-            (error as any).response?.data?.error || "Something went wrong."
-          }`,
+  const { mutate: forgotPwdMutate, isLoading } = useMutation({
+    mutationFn: forgotPwdRequestApi,
+    onSuccess: (userResp: { status: number; data: any; error: any }) => {
+      console.log("User resp", userResp);
+      if (userResp.status == 1) {
+        reset({ email: "" });
+        toast.success(
+          "Password reset email has been sent to your email address",
           toastOptions
         );
-      },
-    }
-  );
+        onCloseModal();
+      } else {
+        toast.error(userResp?.error || "Something went wrong", toastOptions);
+      }
+    },
+    onError: (error) => {
+      console.log("Forgot pwd API Error", error);
+      toast.error(
+        `Error: ${
+          (error as any).response?.data?.error || "Something went wrong."
+        }`,
+        toastOptions
+      );
+    },
+  });
 
-  const forgotPwdSubmit = (formData: { email: string }) => {
+  const forgotPwdSubmit = async (formData: { email: string }) => {
     console.log("Forgot pwd submit", formData);
     forgotPwdMutate(formData);
   };
@@ -103,7 +101,10 @@ const ForgotPassword = ({
     <>
       {showForgotPwdPopup ? (
         <>
-          <form onSubmit={handleSubmit(forgotPwdSubmit)}>
+          <form
+            onSubmit={handleSubmit(forgotPwdSubmit)}
+            // onSubmit={forgotPwdSubmit}
+          >
             <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
               <div className="relative my-6 mx-auto w-96">
                 {/*content*/}

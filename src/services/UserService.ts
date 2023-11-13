@@ -9,6 +9,6 @@ export const userSignup = async (payload: SignupFormValues) => {
   return await axios.post("/user/signup", payload);
 };
 
-export const forgotPwdRequestApi = async (payload: { email: string }) => {
+export const forgotPwdRequest = async (payload: { email: string }) => {
   return await axios.post("/user/forgot-password", payload);
 };

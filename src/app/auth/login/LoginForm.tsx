@@ -9,7 +9,7 @@ import { setLoggedinUserData } from "@/utils/auth";
 import { emailValidateRegex } from "@/utils/helper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useMutation } from "react-query";
 
@@ -40,9 +40,9 @@ export const LoginForm = () => {
     getValues,
   } = useFormInitialize<LoginFormValues>(defaultValues);
 
-  const onCloseModal = () => {
+  const onCloseModal = useCallback(() => {
     setShowForgotPwdPopup(false);
-  };
+  }, []);
 
   const onOpenForgotPwdModal = () => {
     const { email } = getValues();
@@ -198,7 +198,6 @@ export const LoginForm = () => {
         title={"Forgot Password"}
         email={forgotPwdEmail}
         showForgotPwdPopup={showForgotPwdPopup}
-        setShowForgotPwdPopup={setShowForgotPwdPopup}
         onCloseModal={onCloseModal}
       />
     </div>
