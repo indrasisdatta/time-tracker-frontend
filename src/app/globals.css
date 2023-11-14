@@ -17,7 +17,8 @@
   svg {
     display: inline-block;
   }
-  #dropdownCal {
+  #dropdownCal,
+  #dropdownUser {
     top: 3em;
   }
 }

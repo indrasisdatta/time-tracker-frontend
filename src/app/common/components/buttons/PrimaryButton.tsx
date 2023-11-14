@@ -7,7 +7,7 @@ export const PrimaryButton = ({
   className,
   onClick,
 }: {
-  disabled: boolean;
+  disabled?: boolean;
   text: string;
   type: any;
   className?: string;
