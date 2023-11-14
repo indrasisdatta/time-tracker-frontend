@@ -67,7 +67,7 @@ export const LoginForm = () => {
       console.log("Login API Success", userResp);
       if (userResp.status == 1) {
         reset(defaultValues);
-        toast.success(`You've logged in successfully`, toastOptions);
+        // toast.success(`You've logged in successfully`, toastOptions);
         setLoggedinUserData(userResp.data);
         useAuth.setLoggedinUser(userResp.data);
         setTimeout(() => {

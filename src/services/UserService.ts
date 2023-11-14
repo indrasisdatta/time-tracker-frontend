@@ -1,4 +1,8 @@
-import { LoginFormValues, SignupFormValues } from "@/models/User";
+import {
+  LoginFormValues,
+  ResetPwdFormValues,
+  SignupFormValues,
+} from "@/models/User";
 import { axios } from "./axios";
 
 export const userLogin = async (payload: LoginFormValues) => {
@@ -15,4 +19,11 @@ export const forgotPwdRequest = async (payload: { email: string }) => {
 
 export const checkResetToken = async (resetToken: string) => {
   return await axios.get(`/user/reset-password/${resetToken}`);
+};
+
+export const resetPwdSave = async (payload: ResetPwdFormValues) => {
+  if (payload.hasOwnProperty("email")) {
+    delete payload.email;
+  }
+  return await axios.post(`/user/reset-password`, payload);
 };

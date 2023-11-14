@@ -2,11 +2,12 @@
 import { Loader } from "@/app/common/components/Loader";
 import { useFormInitialize } from "@/app/common/hooks/useFormInitialize";
 import { ResetPwdFormValues } from "@/models/User";
-import { checkResetToken } from "@/services/UserService";
+import { checkResetToken, resetPwdSave } from "@/services/UserService";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { Toaster } from "react-hot-toast";
-import { useQuery } from "react-query";
+import toast, { Toaster } from "react-hot-toast";
+import { useMutation, useQuery } from "react-query";
 
 const defaultValues: ResetPwdFormValues = {
   email: "",
@@ -14,9 +15,15 @@ const defaultValues: ResetPwdFormValues = {
   password: "",
   confirmPassword: "",
 };
+const toastOptions = {
+  duration: 5000,
+  style: {
+    maxWidth: "30em",
+  },
+};
 
 export const ResetPasswordForm = ({ resetToken }: { resetToken: string }) => {
-  console.log("Reset token", resetToken);
+  const router = useRouter();
 
   const fetchTokenUser = async () => {
     const { data } = await checkResetToken(
@@ -41,8 +48,38 @@ export const ResetPasswordForm = ({ resetToken }: { resetToken: string }) => {
     watch,
   } = useFormInitialize<ResetPwdFormValues>(defaultValues);
 
+  const resetPwdApi = async (formData: ResetPwdFormValues) => {
+    const { data } = await resetPwdSave(formData);
+    return data;
+  };
+
+  const { isLoading: isLoadingSave, mutate } = useMutation(resetPwdApi, {
+    onSuccess: (userResp) => {
+      console.log("Reset pwd API Success", userResp);
+      if (userResp.status == 1) {
+        reset(defaultValues);
+        toast.success(`Password reset successfully`, toastOptions);
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1000);
+      } else {
+        toast.error(userResp?.error || "Something went wrong", toastOptions);
+      }
+    },
+    onError: (error) => {
+      console.log("Login API Error", error);
+      toast.error(
+        `Error: ${
+          (error as any).response?.data?.error || "Something went wrong."
+        }`,
+        toastOptions
+      );
+    },
+  });
+
   const resetFormSubmit = (formData: ResetPwdFormValues) => {
     console.log("Reset submit", formData);
+    mutate(formData);
   };
 
   /* If token is valid, update React form with email and token */
@@ -60,11 +97,10 @@ export const ResetPasswordForm = ({ resetToken }: { resetToken: string }) => {
   return (
     <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
       <Toaster />
-      {isLoading && <Loader className="m-auto mt-3 flex" />}
+      {(isLoadingSave || isLoading) && <Loader className="m-auto mt-3 flex" />}
 
       <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
         <h1 className="text-xl font-bold ">Reset your password</h1>
-
         {tokenData && tokenData?.status == 1 && (
           <form
             className="space-y-4 md:space-y-6"
@@ -198,7 +234,6 @@ export const ResetPasswordForm = ({ resetToken }: { resetToken: string }) => {
             </p>
           </form>
         )}
-
         {!tokenData ||
           (tokenData?.status == 0 && (
             <p>{tokenData?.error ?? "Reset token is invalid."}</p>
