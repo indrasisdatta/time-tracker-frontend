@@ -10,6 +10,7 @@ axios.interceptors.request.use(async (config) => {
   const loggedinData = await getLoggedinUserData();
   if (
     typeof loggedinData === "object" &&
+    loggedinData &&
     loggedinData.hasOwnProperty("accessToken")
   ) {
     config.headers.Authorization = `Bearer ${loggedinData.accessToken}`;

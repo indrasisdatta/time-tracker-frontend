@@ -7,7 +7,7 @@ const Login = () => {
   const queryClient = new QueryClient();
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto  lg:py-0">
+    <div className="flex flex-col items-center justify-center md:px-6 md:py-8 mx-auto lg:py-0">
       <QueryClientProvider client={queryClient}>
         <LoginForm />
       </QueryClientProvider>

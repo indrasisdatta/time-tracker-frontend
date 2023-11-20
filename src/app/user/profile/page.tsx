@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { EditProfile } from "./edit-profile/EditProfile";
-import { ChangePassword } from "./change-password/ChangePassword";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ChangePaswordForm } from "./ChangePaswordForm";
+import { EditProfileForm } from "./EditProfileForm";
 
 const queryClient = new QueryClient();
 
@@ -43,10 +43,10 @@ const UserProfile = () => {
         <div className="mt-6">
           <div className={openTab === 1 ? "block" : "hidden"}>
             {" "}
-            <EditProfile />
+            <EditProfileForm />
           </div>
           <div className={openTab === 2 ? "block" : "hidden"}>
-            <ChangePassword />
+            <ChangePaswordForm />
           </div>
         </div>
       </div>
