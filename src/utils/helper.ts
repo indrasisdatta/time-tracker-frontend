@@ -182,3 +182,36 @@ export const reportDateRangeDisplay = (
 
 export const emailValidateRegex =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+export const userInitials = (userObj: {
+  firstName: string;
+  lastName: string;
+}) => {
+  return `${userObj?.firstName?.charAt(0)}${userObj?.lastName?.charAt(0)}`;
+};
+
+export const pwdValidate = (val: string) => {
+  // at least 1 lower-case
+  const lowerCase = /[ -~]*[a-z][ -~]*/;
+  // at least 1 upper-case
+  const upperCase = /[ -~]*[A-Z][ -~]*/;
+  // at least 1 special character
+  const splCase = /[ -~]*(?=[ -~])[^0-9a-zA-Z][ -~]*/;
+  // at least 1 number
+  const numCase = /[ -~]*[0-9][ -~]*/;
+  if (
+    !lowerCase.test(val) ||
+    !upperCase.test(val) ||
+    !splCase.test(val) ||
+    !numCase.test(val)
+  ) {
+    return "Password should have at least 1 lower case, 1 upper case and 1 special character";
+  }
+};
+
+export const toastOptions = {
+  duration: 5000,
+  style: {
+    maxWidth: "30em",
+  },
+};

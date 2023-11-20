@@ -10,6 +10,7 @@ export function useFormInitialize<T extends FieldValues>(
     formState: { errors },
     reset,
     watch,
+    getValues,
   } = useForm<T>({
     defaultValues,
   });
@@ -72,5 +73,6 @@ export function useFormInitialize<T extends FieldValues>(
     hasError,
     getInputClass,
     getInputDivClass,
+    getValues,
   };
 }

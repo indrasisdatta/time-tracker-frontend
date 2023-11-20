@@ -23,4 +23,22 @@ export type SignupFormValues = {
 export type LoggedinUser = {
   accessToken: string;
   refreshToken: string;
+  userInfo: {
+    firstName: string;
+    lastName: string;
+    role: string;
+    email: string;
+  };
 } | null;
+
+export type ResetPwdFormValues = {
+  email?: string;
+  resetToken: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export type ChangePwdValues = {
+  password: string;
+  confirmPassword: string;
+};
