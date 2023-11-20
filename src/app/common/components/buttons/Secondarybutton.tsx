@@ -6,7 +6,7 @@ export const SecondaryButton = ({
   type,
   onClick,
 }: {
-  disabled: boolean;
+  disabled?: boolean;
   text: string;
   type: "button" | "reset" | "submit" | "form_cancel" | undefined;
   onClick: any;
