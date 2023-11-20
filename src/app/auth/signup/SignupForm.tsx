@@ -4,7 +4,7 @@ import { Loader } from "@/app/common/components/Loader";
 import { useFormInitialize } from "@/app/common/hooks/useFormInitialize";
 import { SignupFormValues } from "@/models/User";
 import { userSignup } from "@/services/UserService";
-import { emailValidateRegex } from "@/utils/helper";
+import { emailValidateRegex, pwdValidate, toastOptions } from "@/utils/helper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -18,12 +18,6 @@ const defaultValues = {
   role: "end_user",
   password: "",
   confirmPassword: "",
-};
-const toastOptions = {
-  duration: 5000,
-  style: {
-    maxWidth: "30em",
-  },
 };
 
 export const SignupForm = () => {
@@ -191,6 +185,11 @@ export const SignupForm = () => {
                   value: true,
                   message: "Password is required",
                 },
+                minLength: {
+                  value: Number(process.env.NEXT_PUBLIC_PWD_MIN_CHARS),
+                  message: `Password should have minimum ${process.env.NEXT_PUBLIC_PWD_MIN_CHARS} characters`,
+                },
+                validate: pwdValidate,
               })}
             />
             {errors?.password && (

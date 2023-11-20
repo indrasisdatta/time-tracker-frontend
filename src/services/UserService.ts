@@ -1,4 +1,5 @@
 import {
+  ChangePwdValues,
   LoginFormValues,
   ResetPwdFormValues,
   SignupFormValues,
@@ -26,4 +27,8 @@ export const resetPwdSave = async (payload: ResetPwdFormValues) => {
     delete payload.email;
   }
   return await axios.post(`/user/reset-password`, payload);
+};
+
+export const changePwdSave = async (payload: ChangePwdValues) => {
+  return await axios.post(`/user/change-password`, payload);
 };

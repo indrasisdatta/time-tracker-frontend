@@ -37,3 +37,8 @@ export type ResetPwdFormValues = {
   password: string;
   confirmPassword: string;
 };
+
+export type ChangePwdValues = {
+  password: string;
+  confirmPassword: string;
+};
