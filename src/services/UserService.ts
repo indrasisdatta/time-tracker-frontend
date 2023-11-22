@@ -3,6 +3,7 @@ import {
   LoginFormValues,
   ResetPwdFormValues,
   SignupFormValues,
+  UserProfileValues,
 } from "@/models/User";
 import { axios } from "./axios";
 
@@ -31,4 +32,16 @@ export const resetPwdSave = async (payload: ResetPwdFormValues) => {
 
 export const changePwdSave = async (payload: ChangePwdValues) => {
   return await axios.post(`/user/change-password`, payload);
+};
+
+export const getUserProfile = async () => {
+  return await axios.get(`/user/profile`);
+};
+
+export const editProfileSave = async (payload: UserProfileValues) => {
+  const formData = new FormData();
+  for (let key in payload) {
+    formData.append(key, (payload as any)[key]);
+  }
+  return await axios.post(`/user/edit-profile`, formData);
 };

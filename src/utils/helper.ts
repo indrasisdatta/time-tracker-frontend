@@ -5,6 +5,7 @@ import {
   TimesheetPayload,
   Timeslot,
 } from "@/models/Timesheet";
+import { UserInfo } from "@/models/User";
 import moment from "moment";
 
 export const hourStatus = (hrs: number) => {
@@ -183,10 +184,7 @@ export const reportDateRangeDisplay = (
 export const emailValidateRegex =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export const userInitials = (userObj: {
-  firstName: string;
-  lastName: string;
-}) => {
+export const userInitials = (userObj: UserInfo) => {
   return `${userObj?.firstName?.charAt(0)}${userObj?.lastName?.charAt(0)}`;
 };
 

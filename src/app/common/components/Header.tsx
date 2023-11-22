@@ -12,6 +12,7 @@ import { deleteLoggedinUserData, getLoggedinUserData } from "@/utils/auth";
 import { useAuth } from "../hooks/useAuth";
 import { LoggedinUser } from "@/models/User";
 import { PrimaryButton } from "./buttons/PrimaryButton";
+import Image from "next/image";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +80,34 @@ export const Header = () => {
     setTimeout(() => {
       setIsOpen(false);
     }, 500);
+  };
+
+  const userAvatar = () => {
+    if (loggedinUser) {
+      if (loggedinUser?.userInfo?.profileImage) {
+        return (
+          <span onClick={() => setShowUserMenu((prevState) => !prevState)}>
+            <Image
+              width="100"
+              height="100"
+              className="rounded-full w-30 h-30"
+              loader={() => loggedinUser?.userInfo?.profileImage}
+              src={loggedinUser?.userInfo?.profileImage}
+              alt=" "
+            />
+          </span>
+        );
+      }
+      return (
+        <span
+          className=" font-medium text-gray-600 dark:text-gray-300"
+          onClick={() => setShowUserMenu((prevState) => !prevState)}
+        >
+          {userInitials(loggedinUser?.userInfo)}
+        </span>
+      );
+    }
+    return null;
   };
 
   return (
@@ -235,12 +264,7 @@ export const Header = () => {
                     ref={userDropdown}
                     className="cursor-pointer md:float-right md:mr-3 relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
                   >
-                    <span
-                      className=" font-medium text-gray-600 dark:text-gray-300"
-                      onClick={() => setShowUserMenu((prevState) => !prevState)}
-                    >
-                      {userInitials(loggedinUser?.userInfo)}
-                    </span>
+                    {userAvatar()}
                   </div>
                   <div
                     id="userDropdown"

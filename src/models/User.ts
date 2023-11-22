@@ -20,15 +20,18 @@ export type SignupFormValues = {
   confirmPassword: string;
 };
 
+export type UserInfo = {
+  firstName: string;
+  lastName: string;
+  role: string;
+  email: string;
+  profileImage: string;
+};
+
 export type LoggedinUser = {
   accessToken: string;
   refreshToken: string;
-  userInfo: {
-    firstName: string;
-    lastName: string;
-    role: string;
-    email: string;
-  };
+  userInfo: UserInfo;
 } | null;
 
 export type ResetPwdFormValues = {
@@ -41,4 +44,11 @@ export type ResetPwdFormValues = {
 export type ChangePwdValues = {
   password: string;
   confirmPassword: string;
+};
+
+export type UserProfileValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  profileImage: any;
 };
