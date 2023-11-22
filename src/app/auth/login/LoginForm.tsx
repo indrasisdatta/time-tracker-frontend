@@ -70,9 +70,7 @@ export const LoginForm = () => {
         // toast.success(`You've logged in successfully`, toastOptions);
         setLoggedinUserData(userResp.data);
         useAuth.setLoggedinUser(userResp.data);
-        setTimeout(() => {
-          router.push("/user/profile");
-        }, 1000);
+        router.push("/user/profile");
       } else {
         toast.error(userResp?.error || "Something went wrong", toastOptions);
       }

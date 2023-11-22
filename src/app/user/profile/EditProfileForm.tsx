@@ -1,15 +1,21 @@
 import { Loader } from "@/app/common/components/Loader";
 import { AlertButton } from "@/app/common/components/buttons/AlertButton";
-import { AltButton } from "@/app/common/components/buttons/AltButton";
 import { PrimaryButton } from "@/app/common/components/buttons/PrimaryButton";
 import { SecondaryButton } from "@/app/common/components/buttons/Secondarybutton";
 import { useFormInitialize } from "@/app/common/hooks/useFormInitialize";
-import { UserProfileValues } from "@/models/User"; // Update with your User model
-import { editProfileSave, getUserProfile } from "@/services/UserService"; // Update with your UserService
+import { AuthContext } from "@/context/AuthContext";
+import { UserProfileValues } from "@/models/User";
+import { editProfileSave, getUserProfile } from "@/services/UserService";
+import { setLoggedinUserData } from "@/utils/auth";
 import { emailValidateRegex, toastOptions } from "@/utils/helper";
 import Image from "next/image";
-import React, { SyntheticEvent, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import React, {
+  ChangeEvent,
+  SyntheticEvent,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useMutation, useQuery } from "react-query";
 
@@ -21,9 +27,19 @@ const defaultValues: UserProfileValues = {
 };
 
 export const EditProfileForm = () => {
-  /* Profile form */
-  const { register, handleSubmit, errors, reset, hasError, watch } =
-    useFormInitialize<UserProfileValues>(defaultValues);
+  const useAuth: any = useContext(AuthContext);
+  const {
+    register,
+    handleSubmit,
+    errors,
+    reset,
+    hasError,
+    watch,
+    setValue,
+    trigger,
+  } = useFormInitialize<UserProfileValues>(defaultValues);
+
+  const profileImageRef = useRef<HTMLInputElement>(null);
 
   /* Get user profile info */
   const getUserProfileApi = async () => {
@@ -54,10 +70,18 @@ export const EditProfileForm = () => {
 
   /* Mutation to save edited profile data */
   const { mutate, isLoading } = useMutation(updateProfileApi, {
-    onSuccess: (userResp) => {
+    onSuccess: async (userResp) => {
       console.log("Update Profile API Success", userResp);
       if (userResp.status === 1) {
-        reset(defaultValues);
+        // reset(defaultValues);
+        const userCookieData = await useAuth.loggedinUser;
+        console.log("Existing userCookieData", userCookieData);
+        if (userCookieData) {
+          userCookieData.userInfo = { ...userResp.data };
+          console.log("Updated userCookieData", userCookieData);
+          setLoggedinUserData(userCookieData);
+          useAuth.setLoggedinUser(Promise.resolve(userCookieData));
+        }
         toast.success(`Your profile is updated successfully.`, toastOptions);
       } else {
         toast.error(userResp?.error || "Something went wrong", toastOptions);
@@ -75,13 +99,18 @@ export const EditProfileForm = () => {
   });
 
   const updateProfileSubmit = async (formData: UserProfileValues) => {
-    console.log("Update profile submit", formData);
+    // console.log("Update profile submit", formData);
     mutate(formData);
   };
 
   /* Image upload handler function */
-  const handleImageChange = (e: SyntheticEvent) => {
-    console.log("Upload image", e);
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // console.log("Upload image", e.target.files);
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue("profileImage", file);
+      trigger("profileImage");
+    }
   };
 
   /**
@@ -120,6 +149,19 @@ export const EditProfileForm = () => {
     if (isLoadingProfile) {
       return null;
     }
+    const watchProfileImg = watch("profileImage");
+    if (watchProfileImg) {
+      return (
+        <Image
+          width="100"
+          height="100"
+          className="rounded w-36 h-36 mr-3"
+          loader={() => URL.createObjectURL(watchProfileImg)}
+          src={URL.createObjectURL(watchProfileImg)}
+          alt=" "
+        />
+      );
+    }
     /* Show previously saved image */
     if (userProfile?.data?.profileImage) {
       return (
@@ -150,6 +192,17 @@ export const EditProfileForm = () => {
         </svg>
       </div>
     );
+  };
+
+  const handleImageReset = () => {
+    console.log("profileImageRef", profileImageRef);
+    if (profileImageRef?.current) {
+      setValue("profileImage", "");
+      trigger("profileImage");
+      profileImageRef.current.value = "";
+      profileImageRef.current.type = "";
+      profileImageRef.current.type = "file";
+    }
   };
 
   return (
@@ -271,9 +324,9 @@ export const EditProfileForm = () => {
           </div>
           <div className="w-full md:w-1/2">
             <div className="md:flex mb-4">
-              <div className="w-full md:w-1/3">
+              <div className="w-full">
                 <label
-                  htmlFor="profileImage"
+                  htmlFor="profile-image"
                   className={`block text-sm font-medium leading-6 ${
                     hasError("profileImage")
                       ? "text-red-600"
@@ -284,27 +337,39 @@ export const EditProfileForm = () => {
                 </label>
                 <div className="mt-1 flex items-center space-x-2">
                   {displayUserProfilePhoto()}
-                  <label
-                    htmlFor="profile-image"
-                    className="cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
-                  >
-                    Upload
-                  </label>
+                  {!watch("profileImage") && (
+                    <label
+                      htmlFor="profile-image"
+                      className="cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right"
+                    >
+                      Upload
+                    </label>
+                  )}
+
                   <input
-                    {...register("profileImage", {
-                      validate: {
-                        fileSize: (files) => {
-                          console.log("Files", files);
-                          if (files[0]?.size > 5 * 1000 * 1000) {
-                            return "File size should be less than 5MB";
-                          }
-                        },
-                      },
-                    })}
                     type="file"
                     id="profile-image"
                     className="hidden"
-                    accept="image/png, image,jpeg"
+                    // accept="image/png, image,jpeg"
+                    {...register("profileImage", {
+                      validate: (file) => {
+                        console.log("Files validation >>", file);
+                        if (file) {
+                          if (file?.size > 5 * 1000 * 1000) {
+                            return "File size should be less than 5MB";
+                          }
+                          const acceptedFormats = ["jpg", "png"];
+                          const fileExtension = file?.name
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
+                          if (!acceptedFormats.includes(fileExtension)) {
+                            return "Only jpg, png image files are allowed.";
+                          }
+                        }
+                      },
+                    })}
+                    ref={profileImageRef}
                     onChange={handleImageChange}
                   />
                   {errors?.profileImage && (
@@ -312,7 +377,13 @@ export const EditProfileForm = () => {
                       {(errors?.profileImage as any)?.message}
                     </span>
                   )}
-                  <AlertButton text="Reset" type="button" onClick={() => {}} />
+                  {watch("profileImage") && (
+                    <AlertButton
+                      text="Reset"
+                      type="button"
+                      onClick={handleImageReset}
+                    />
+                  )}
                 </div>
               </div>
             </div>

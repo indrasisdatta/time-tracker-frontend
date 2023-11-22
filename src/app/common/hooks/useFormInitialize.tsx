@@ -11,6 +11,8 @@ export function useFormInitialize<T extends FieldValues>(
     reset,
     watch,
     getValues,
+    setValue,
+    trigger,
   } = useForm<T>({
     defaultValues,
   });
@@ -74,5 +76,7 @@ export function useFormInitialize<T extends FieldValues>(
     getInputClass,
     getInputDivClass,
     getValues,
+    setValue,
+    trigger,
   };
 }

@@ -4,7 +4,13 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ChangePaswordForm } from "./ChangePaswordForm";
 import { EditProfileForm } from "./EditProfileForm";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const UserProfile = () => {
   const [openTab, setOpenTab] = useState(1);

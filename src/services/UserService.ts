@@ -39,5 +39,9 @@ export const getUserProfile = async () => {
 };
 
 export const editProfileSave = async (payload: UserProfileValues) => {
-  return await axios.post(`/user/edit-profile`, payload);
+  const formData = new FormData();
+  for (let key in payload) {
+    formData.append(key, (payload as any)[key]);
+  }
+  return await axios.post(`/user/edit-profile`, formData);
 };
