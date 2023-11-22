@@ -82,6 +82,8 @@ export const EditProfileForm = () => {
           setLoggedinUserData(userCookieData);
           useAuth.setLoggedinUser(Promise.resolve(userCookieData));
         }
+        handleImageReset();
+        userProfile.data = { ...userProfile.data, ...userResp.data };
         toast.success(`Your profile is updated successfully.`, toastOptions);
       } else {
         toast.error(userResp?.error || "Something went wrong", toastOptions);
@@ -150,7 +152,7 @@ export const EditProfileForm = () => {
       return null;
     }
     const watchProfileImg = watch("profileImage");
-    if (watchProfileImg) {
+    if (watchProfileImg && !errors?.profileImage) {
       return (
         <Image
           width="100"
