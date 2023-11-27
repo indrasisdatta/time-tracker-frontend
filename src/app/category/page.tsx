@@ -2,7 +2,15 @@
 import { QueryClient, QueryClientProvider } from "react-query";
 import CategoryList from "./CategoryList";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: false,
+    },
+  },
+});
 
 const CategoryMain = () => {
   return (

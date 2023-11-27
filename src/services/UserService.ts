@@ -7,6 +7,10 @@ import {
 } from "@/models/User";
 import { axios } from "./axios";
 
+export const authRegenerateToken = async () => {
+  return await axios.get("/user/regenerate-token");
+};
+
 export const userLogin = async (payload: LoginFormValues) => {
   return await axios.post("/user/login", payload);
 };
