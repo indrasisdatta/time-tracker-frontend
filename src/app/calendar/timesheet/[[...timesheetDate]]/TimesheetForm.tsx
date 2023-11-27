@@ -114,6 +114,9 @@ const TimesheetFormComponent = ({
     error: errorTimesheetData,
     refetch: refetchTimesheetData,
   } = useQuery(["timesheetData", timesheetDate], getTimesheetDatewiseApi, {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
     // refetchOnWindowFocus: false,
     // enabled: false,
     // manual: true,
