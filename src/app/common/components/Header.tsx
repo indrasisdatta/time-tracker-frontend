@@ -13,6 +13,7 @@ import { useAuth } from "../hooks/useAuth";
 import { LoggedinUser } from "@/models/User";
 import { PrimaryButton } from "./buttons/PrimaryButton";
 import Image from "next/image";
+import { ThemeSwitchButton } from "./ThemeSwitchButton";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -217,7 +218,7 @@ export const Header = () => {
             )}
 
             <div
-              className={`text-sm lg:flex lg:flex-grow lg:items-center ${
+              className={`text-sm lg:flex lg:items-right ${
                 loggedinUser ? "text-center md:text-left " : ""
               }`}
             >
@@ -251,15 +252,6 @@ export const Header = () => {
               )}
               {loggedinUser && (
                 <>
-                  {/* <img
-                    id="avatarButton"
-                    type="button"
-                    data-dropdown-toggle="userDropdown"
-                    data-dropdown-placement="bottom-start"
-                    class="w-10 h-10 rounded-full cursor-pointer"
-                    src="/docs/images/people/profile-picture-5.jpg"
-                    alt="User dropdown"
-                  /> */}
                   <div
                     ref={userDropdown}
                     className="cursor-pointer md:float-right md:mr-3 relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
@@ -270,7 +262,7 @@ export const Header = () => {
                     id="userDropdown"
                     className={`${
                       showUserMenu ? "block" : "hidden"
-                    } z-10 top-[4em] md:absolute bg-white divide-y divide-gray-100 rounded-lg shadow mt-3 md:mt-0 md:w-auto w-50 dark:bg-gray-700 dark:divide-gray-600`}
+                    } z-10 top-[4em] right-[1em] md:absolute bg-white divide-y divide-gray-100 rounded-lg shadow mt-3 md:mt-0 md:w-auto w-50 dark:bg-gray-700 dark:divide-gray-600`}
                   >
                     <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
                       <div>
@@ -303,20 +295,15 @@ export const Header = () => {
                         </Link>
                       </li>
                     </ul>
-                    {/* <div className="py-1">
-                      <a
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                      >
-                        Sign out
-                      </a>
-                    </div> */}
                   </div>
                 </>
               )}
             </div>
-            <div className="mt-3 md:mt-0 text-center lg:inline-flex items-center">
-              <ThemeSwitch />
+            {/* <div className="mt-3 md:mt-0 text-center lg:inline-flex items-center"> */}
+            {/* <ThemeSwitch /> */}
+            {/* </div> */}
+            <div className="flex flex-col justify-center items-center">
+              <ThemeSwitchButton />
             </div>
           </div>
         </nav>
