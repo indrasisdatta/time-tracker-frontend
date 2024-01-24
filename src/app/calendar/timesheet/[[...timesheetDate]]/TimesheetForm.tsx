@@ -16,20 +16,17 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import Select from "react-tailwindcss-select";
 import { getCategories } from "@/services/CategoryService";
-import {
-  QueryFunctionContext,
-  QueryKey,
-  useMutation,
-  useQuery,
-} from "react-query";
+import { QueryKey, useMutation, useQuery } from "react-query";
 import { Category, SubCategory } from "@/models/Category";
-import { TimesheetPayload, Timeslot } from "@/models/Timesheet";
+import {
+  ReactSelectType,
+  TimesheetPayload,
+  Timeslot,
+} from "@/models/Timesheet";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { calculateTimeDifference, summaryTime } from "@/utils/helper";
 import { Loader } from "@/app/common/components/Loader";
-import { useRouter } from "next/router";
-import { redirect } from "next/navigation";
 import {
   getTimesheetDatewise,
   saveTimesheet,
@@ -117,6 +114,9 @@ const TimesheetFormComponent = ({
     error: errorTimesheetData,
     refetch: refetchTimesheetData,
   } = useQuery(["timesheetData", timesheetDate], getTimesheetDatewiseApi, {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
     // refetchOnWindowFocus: false,
     // enabled: false,
     // manual: true,
@@ -168,9 +168,10 @@ const TimesheetFormComponent = ({
 
   /* Category, subcategory dropdown value status based on API result */
   const {
-    isLoading,
+    isLoading: isLoadingCat,
     data: categoryData,
-    error,
+    error: errorCat,
+    isError: isErrorCat,
   } = useQuery("categoryList", fetchCategories, {
     refetchOnWindowFocus: false,
   });
@@ -347,7 +348,9 @@ const TimesheetFormComponent = ({
       row.category =
         typeof row.category === "object" ? row.category?.value : "";
       row.subCategory =
-        typeof row.subCategory === "object" ? row.subCategory?.value : "";
+        typeof row.subCategory === "object"
+          ? (row.subCategory as ReactSelectType)?.value
+          : "";
       // row.comments = null;
     });
     console.log("Payload: ", payload);
@@ -387,7 +390,38 @@ const TimesheetFormComponent = ({
   return (
     <div>
       <Toaster />
-      {isLoadingSave && <Loader className="m-auto mt-3" />}
+      {(isLoadingSave || isLoadingCat || isLoadingTimesheetData) && (
+        <div className="m-auto text-center">
+          <Loader className="" />
+          <p className="mb-6">
+            {isLoadingSave
+              ? "Saving timesheet"
+              : isLoadingCat || isLoadingTimesheetData
+              ? "Initializing form"
+              : ""}
+          </p>
+        </div>
+      )}
+      {isErrorCat && (
+        <div className="m-auto my-3 text-center">
+          <p className="mb-3">
+            Category load:{" "}
+            {(errorCat as Error)?.message
+              ? (errorCat as Error).message
+              : "Something went wrong. Please try again later."}
+          </p>
+        </div>
+      )}
+      {isErrorTimesheetData && (
+        <div className="m-auto my-3 text-center">
+          <p className="mb-3">
+            Timesheet load:{" "}
+            {(errorTimesheetData as Error)?.message
+              ? (errorTimesheetData as Error).message
+              : "Something went wrong. Please try again later."}
+          </p>
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="md:flex">
           {/* Col 1: form inputs */}
@@ -449,7 +483,13 @@ const TimesheetFormComponent = ({
                   // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
-                  disabled={!timesheetDate?.startDate}
+                  disabled={
+                    !timesheetDate?.startDate ||
+                    isErrorCat ||
+                    isErrorTimesheetData ||
+                    isLoadingCat ||
+                    isLoadingTimesheetData
+                  }
                 >
                   <PlusIcon className="h-4 w-4 hidden md:block" />
                   <span className="font-normal text-sm">Add entry</span>
@@ -478,7 +518,7 @@ const TimesheetFormComponent = ({
                 <div className="w-full md:w-2/12">Category</div>
                 <div className="w-full md:w-3/12">Sub-category</div>
                 <div className="w-full md:w-2/12">Duration</div>
-                <div className="w-full md:w-1/12"></div>
+                <div className="w-full md:w-2/12"></div>
               </div>
             )}
             {/* Timesheet enry input rows */}
@@ -653,7 +693,7 @@ const TimesheetFormComponent = ({
                     </span>
                   )}
                 </div>
-                <div className="w-full md:w-3/12">
+                <div className="w-full md:w-2/12">
                   <Controller
                     control={control}
                     name={`timeslots.${index}.subCategory`}
@@ -724,7 +764,7 @@ const TimesheetFormComponent = ({
                       </span>
                     )}
                 </div>
-                <div className="w-full md:w-1/12 flex justify-center items-center">
+                <div className="w-full md:w-2/12 flex justify-center items-center">
                   <span>
                     {formValues.timeslots &&
                       formValues.timeslots.length > 0 &&
@@ -757,7 +797,13 @@ const TimesheetFormComponent = ({
                   // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded md:w-auto md:d-flex justify-content-right pr-3 disabled:opacity-50"
                   className="rounded-md bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-sm text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 md:w-auto md:d-flex justify-content-right mr-3"
                   onClick={addRow}
-                  disabled={!timesheetDate?.startDate}
+                  disabled={
+                    !timesheetDate?.startDate ||
+                    isErrorCat ||
+                    isErrorTimesheetData ||
+                    isLoadingCat ||
+                    isLoadingTimesheetData
+                  }
                 >
                   <PlusIcon className="h-4 w-4 hidden md:block" />
                   <span className="font-normal text-sm">Add entry</span>

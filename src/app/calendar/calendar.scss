@@ -89,3 +89,19 @@ svg.md\:block {
     overflow-y: auto;
   }
 }
+.rcs-analog-time-picker-form-container {
+  margin-top: 20px;
+}
+input[name="rcs-time-seconds"] {
+  display: none;
+}
+.rcs-show-picker-modal {
+  width: 200px;
+}
+.rcs-analog-picker.rcs-show-picker-modal.rcs-analog-picker-custom {
+  position: absolute;
+}
+
+.rcs-analog-picker-input-custom {
+  max-width: 24rem;
+}
