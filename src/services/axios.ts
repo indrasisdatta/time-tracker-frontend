@@ -10,6 +10,10 @@ const axios = Axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 });
 
+export const healthCheck = async () => {
+  return await axios.get(`health`);
+};
+
 /* Request interceptor - Inject access token in Authorization header */
 axios.interceptors.request.use(async (config) => {
   console.log("Request interceptor config", config, config.url);

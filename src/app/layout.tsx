@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { Header } from "./common/components/Header";
 // import { ThemeProvider } from "next-themes";
 import { ThemeWrapper } from "./ThemeWrapper";
+import { HealthChecker } from "./common/components/HealthChecker";
 // import { NextProgressBar } from "./common/components/NextProgressBar";
 import { Suspense, useCallback } from "react";
 import { Loader } from "./common/components/Loader";
@@ -37,6 +38,7 @@ export default function RootLayout({
               <div className="container mx-auto md:p-8 my-8">{children}</div>
             </Suspense>
           </ThemeWrapper>
+          <HealthChecker />
         </AuthContextProvider>
       </body>
     </html>
