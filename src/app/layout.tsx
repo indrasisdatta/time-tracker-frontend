@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { Header } from "./common/components/Header";
 // import { ThemeProvider } from "next-themes";
 import { ThemeWrapper } from "./ThemeWrapper";
+import { HealthChecker } from "./common/components/HealthChecker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         <ThemeWrapper>
           <Header />
           <div className="container mx-auto p-8">{children}</div>
+          <HealthChecker />
         </ThemeWrapper>
       </body>
     </html>
