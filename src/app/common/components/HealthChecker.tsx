@@ -1,15 +1,15 @@
 "use client";
 import { healthCheck } from "@/services/axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 
-export const HealthChecker = () => {
+const HealthCheckerComp = () => {
   const timerRef = useRef<any>(null);
 
   useEffect(() => {
     timerRef.current = setInterval(async () => {
       console.log("Health check");
       await healthCheck();
-    }, 30000);
+    }, 45000);
 
     return () => {
       clearInterval(timerRef.current);
@@ -18,3 +18,5 @@ export const HealthChecker = () => {
 
   return null;
 };
+
+export const HealthChecker = memo(HealthCheckerComp);

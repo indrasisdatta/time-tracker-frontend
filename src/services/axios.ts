@@ -17,6 +17,10 @@ export const healthCheck = async () => {
 /* Request interceptor - Inject access token in Authorization header */
 axios.interceptors.request.use(async (config) => {
   console.log("Request interceptor config", config, config.url);
+  /* Header injection is not needed for health endpoint */
+  if (config.url === "health") {
+    return config;
+  }
   const loggedinData = await getLoggedinUserData();
   let tokenField = "accessToken";
   let headerKey = "x-access-token";
