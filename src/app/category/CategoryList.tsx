@@ -101,6 +101,9 @@ const CategoryList = () => {
   const { isSuccess, isError, isLoading, data, error } = useQuery(
     "categories",
     fetchCategories
+    // {
+    //   staleTime: 0,
+    // }
   );
 
   /* Every time react-query data changes, update local state */
@@ -114,7 +117,7 @@ const CategoryList = () => {
     setShowModal(true);
   };
 
-  // console.log("API category data", data);
+  console.log("Category List comp render");
 
   return (
     <div className="container mx-auto">
