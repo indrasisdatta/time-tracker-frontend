@@ -14,10 +14,11 @@ import React, {
  */
 
 export const AuthContext = createContext<{
-  loggedinUser: Promise<LoggedinUser>;
+  loggedinUser: Promise<LoggedinUser> | null;
   setLoggedinUser: Dispatch<SetStateAction<Promise<LoggedinUser>>>;
 }>({
-  loggedinUser: getLoggedinUserData() || null,
+  // loggedinUser: getLoggedinUserData() || null,
+  loggedinUser: null,
   setLoggedinUser: () => Promise.resolve(null),
 });
 

@@ -7,9 +7,7 @@ const nextConfig = {
         ? false
         : { exclude: ["error"] },
   },
-  experimental: {
-    serverActions: true,
-  },
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;
