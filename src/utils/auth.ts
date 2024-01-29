@@ -20,10 +20,10 @@ export const getLoggedinUserData = async () => {
         cookies().get(process.env.NEXT_PUBLIC_USER_LS_KEY!)!.value
       );
     } catch (e) {
-      return null;
+      return "";
     }
   }
-  return null;
+  return "";
 };
 export const deleteLoggedinUserData = async () => {
   return cookies().delete(process.env.NEXT_PUBLIC_USER_LS_KEY!);

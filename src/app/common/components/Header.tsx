@@ -222,7 +222,7 @@ export const Header = () => {
                 loggedinUser ? "text-center md:text-left " : ""
               }`}
             >
-              {!loggedinUser && (
+              {!loggedinUser && loggedinUser === null && (
                 <>
                   <Link
                     href="/auth/login"
