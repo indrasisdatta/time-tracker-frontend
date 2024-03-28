@@ -8,7 +8,7 @@ import { redirect, usePathname } from "next/navigation";
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { isServer, userInitials } from "@/utils/helper";
 import { useRouter } from "next/navigation";
-import { deleteLoggedinUserData, getLoggedinUserData } from "@/utils/auth";
+import { deleteLoggedinUserData } from "@/utils/auth";
 import { useAuth } from "../hooks/useAuth";
 import { LoggedinUser } from "@/models/User";
 import { PrimaryButton } from "./buttons/PrimaryButton";
@@ -34,7 +34,8 @@ export const Header = () => {
 
   const userLogout = () => {
     deleteLoggedinUserData();
-    setLoggedinUser(null as unknown as Promise<LoggedinUser>);
+    // setLoggedinUser(null as unknown as Promise<LoggedinUser>);
+    setLoggedinUser(null);
     console.log("Calling setLoggedinUser");
     router.push(`/auth/login`);
   };

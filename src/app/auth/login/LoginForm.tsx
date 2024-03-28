@@ -70,7 +70,10 @@ export const LoginForm = () => {
         // toast.success(`You've logged in successfully`, toastOptions);
         setLoggedinUserData(userResp.data);
         useAuth.setLoggedinUser(userResp.data);
-        router.push("/user/profile");
+        // console.log("User response set", userResp.data);
+        setTimeout(() => {
+          router.push("/calendar/timesheet");
+        }, 100);
       } else {
         toast.error(userResp?.error || "Something went wrong", toastOptions);
       }
